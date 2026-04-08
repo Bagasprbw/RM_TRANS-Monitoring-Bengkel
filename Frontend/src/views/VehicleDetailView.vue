@@ -19,12 +19,15 @@
         </div>
 
         <div class="km-card" @click="showUpdateKm = true" title="Klik untuk update KM">
-          <p class="km-label">Total Kilometer</p>
+          <p class="km-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="10" height="10" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Total Kilometer
+          </p>
           <div class="km-row">
             <span class="km-value">{{ formatNumber(vehicle.total_km) }}</span>
             <span class="km-unit">km</span>
             <span class="edit-km-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="13" height="13" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </span>
           </div>
         </div>
@@ -74,8 +77,8 @@
                 <p>Memuat komponen...</p>
             </div>
             <div v-else-if="filteredComponents.length === 0" class="empty-state">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l4.2 4.2M23 12h-6m-6 0H1"/></svg>
-              <p>Tidak ada komponen ditemukan</p>
+              <h4>Komponen Kosong</h4>
+              <p>Tidak ada data komponen yang ditemukan untuk kendaraan ini.</p>
             </div>
 
             <div
@@ -431,13 +434,14 @@ export default {
 .status-badge { padding: 0.2rem 0.65rem; background: #dcfce7; color: #15803d; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
 .page-sub { font-size: 0.78rem; color: #9ca3af; margin-top: 2px; }
 
-.km-card { background: #f5f5fb; border: 1.5px solid #e8e8f0; border-radius: 12px; padding: 0.75rem 1.1rem; min-width: 170px; cursor: pointer; transition: all 0.15s; }
-.km-card:hover { border-color: #3E3D90; box-shadow: 0 0 0 3px rgba(62,61,144,0.1); }
-.km-label { font-size: 0.68rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; }
-.km-row { display: flex; align-items: baseline; gap: 5px; }
-.km-value { font-size: 1.4rem; font-weight: 700; color: #1e1d4c; }
-.km-unit { font-size: 0.8rem; color: #9ca3af; }
-.edit-km-btn { margin-left: 4px; color: #9ca3af; display: flex; align-items: center; }
+.km-card { background: #fff; border: 1.5px solid #e2e8f0; border-left: 3px solid #3E3D90; border-radius: 8px; padding: 0.5rem 0.95rem; min-width: 150px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.km-card:hover { border-color: #3E3D90; box-shadow: 0 4px 12px rgba(62,61,144,0.08); transform: translateY(-1px); }
+.km-label { font-size: 0.6rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; display: flex; align-items: center; gap: 3px; }
+.km-row { display: flex; align-items: baseline; gap: 4px; }
+.km-value { font-size: 1.25rem; font-weight: 700; color: #1e1d4c; line-height: 1.15; }
+.km-unit { font-size: 0.75rem; font-weight: 600; color: #64748b; }
+.edit-km-btn { margin-left: auto; color: #94a3b8; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 5px; transition: all 0.2s; align-self: center; background: #f8fafc; }
+.km-card:hover .edit-km-btn { background: #3E3D90; color: #ffffff; }
 
 /* CONTENT */
 .content-body { flex: 1; padding: 1.75rem 2rem; }
@@ -465,6 +469,10 @@ export default {
 /* COMPONENTS */
 .loading-state { padding: 3rem; text-align: center; color: #9ca3af; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center; background: #faf9ff; border-radius: 12px; border: 2px dashed #e8e8f0; margin: 1.5rem; }
+.empty-state h4 { font-size: 1.05rem; font-weight: 600; color: #64748b; margin: 0 0 0.25rem 0; }
+.empty-state p { font-size: 0.85rem; color: #94a3b8; margin: 0; max-width: 300px; line-height: 1.5; }
 
 .component-item { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.5rem; border-bottom: 1px solid #f5f5fb; transition: background 0.1s; }
 .component-item:hover { background: #faf9ff; }
