@@ -20,6 +20,9 @@
           <div class="existing-list">
             <span v-for="cat in kategoriList" :key="cat.id" class="existing-chip">
               {{ cat.nama_kategori }}
+              <button class="chip-delete" @click="handleDelete(cat.id)" title="Hapus Kategori">
+                &times;
+              </button>
             </span>
           </div>
         </div>
@@ -37,6 +40,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'AddCategoryModal',
@@ -60,7 +64,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions('kategoriKomponen', ['createKategori']),
+    ...mapActions('kategoriKomponen', ['createKategori', 'deleteKategori']),
     async submit() {
       if (!this.form.nama_kategori.trim()) { 
         this.errors = { nama_kategori: 'Nama kategori wajib diisi' }; 
@@ -77,6 +81,19 @@ export default {
         this.form.nama_kategori = '';
         this.errors = {};
         // keep open so user can see it saved and view existing list
+      }
+    },
+    async handleDelete(id) {
+      const result = await Swal.fire({
+        title: 'Hapus Kategori?',
+        text: 'Anda yakin ingin menghapus kategori ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Ya, Hapus'
+      });
+      if (result.isConfirmed) {
+         await this.deleteKategori(id);
       }
     }
   }
@@ -101,7 +118,9 @@ input:focus { border-color: #3E3D90; box-shadow: 0 0 0 3px rgba(62,61,144,0.1); 
 .existing-box { background: #f9fafb; border: 1px dashed #d1d5db; border-radius: 10px; padding: 1rem; max-height: 180px; overflow-y: auto; }
 .existing-label { font-size: 0.7rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.65rem; }
 .existing-list { display: flex; flex-wrap: wrap; gap: 6px; }
-.existing-chip { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; border: 1px solid #c7d2fe; }
+.existing-chip { display: inline-flex; align-items: center; gap: 5px; background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; border: 1px solid #c7d2fe; }
+.chip-delete { background: none; border: none; font-size: 1rem; color: #818cf8; cursor: pointer; padding: 0; line-height: 1; transition: color 0.15s; margin-left: 2px; }
+.chip-delete:hover { color: #ef4444; }
 
 .modal-footer { display: flex; justify-content: flex-end; gap: 0.65rem; padding: 1rem 1.4rem; border-top: 1px solid #f0f0f8; }
 .btn-cancel { padding: 0.6rem 1.1rem; background: #fff; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 500; color: #6b7280; cursor: pointer; transition: all 0.15s; }

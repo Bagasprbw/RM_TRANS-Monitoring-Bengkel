@@ -75,6 +75,22 @@ const actions = {
     } finally {
       commit('SET_LOADING', false)
     }
+  },
+
+  async deleteKategori({ commit, dispatch }, id) {
+    commit('SET_LOADING', true)
+    try {
+      await kategoriKomponenApi.delete(id)
+      Swal.fire('Terhapus', 'Kategori komponen berhasil dihapus', 'success')
+      dispatch('fetchKategori')
+      return { success: true }
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Gagal menghapus kategori. Kategori ini kemungkinan besar masih digunakan (berelasi) dengan data lainnya.';
+      Swal.fire('Tidak Dapat Dihapus', msg, 'error')
+      return { success: false, error: msg }
+    } finally {
+      commit('SET_LOADING', false)
+    }
   }
 }
 

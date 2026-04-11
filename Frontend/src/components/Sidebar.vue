@@ -39,7 +39,7 @@
 
       <!-- User + Logout -->
       <div class="sidebar-footer">
-        <div class="user-info" v-if="user">
+        <div class="user-info" v-if="user" @click="$router.push('/profile')" title="Buka Profil Anda">
           <div class="user-avatar">{{ userInitial }}</div>
           <div class="user-details">
             <span class="user-name">{{ user.name }}</span>
@@ -325,6 +325,12 @@ export default {
   margin-bottom: 6px;
   border-radius: 10px;
   background: #f5f5fb;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.user-info:hover {
+  background: #ede9fe;
 }
 
 .user-avatar {

@@ -86,6 +86,7 @@
               v-for="comp in filteredComponents"
               :key="comp.id"
               class="component-item"
+              :class="{'row-danger': comp.health < 30}"
             >
               <div class="comp-icon" :class="getIconClass(comp.health)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l4.2 4.2M23 12h-6m-6 0H1"/></svg>
@@ -405,7 +406,8 @@ export default {
                 this.loadComponents();
                 Swal.fire('Terhapus', 'Komponen berhasil dihapus', 'success');
             } catch (err) {
-                alert('Gagal menghapus komponen');
+                const msg = err.response?.data?.message || 'Gagal menghapus komponen';
+                Swal.fire('Gagal', msg, 'error');
             }
         }
     }
@@ -488,6 +490,9 @@ export default {
 .comp-category { padding: 2px 7px; background: #f5f5fb; border: 1px solid #e8e8f0; color: #6b7280; border-radius: 5px; font-size: 0.68rem; font-weight: 500; }
 .identity-badge { font-size: 0.65rem; color: #3E3D90; background: #ede9fe; padding: 2px 6px; border-radius: 4px; font-weight: 600; cursor: help; }
 
+.row-danger { background-color: #fff0f0 !important; border-left: 3px solid #ef4444; }
+.row-danger:hover { background-color: #ffe4e4 !important; }
+
 .progress-bar { background: #f0f0f8; border-radius: 999px; height: 6px; margin-bottom: 6px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 999px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 .bg-green { background: #22c55e; }
@@ -513,12 +518,12 @@ export default {
 /* MODAL STYLES */
 .modal-overlay { position: fixed; inset: 0; background: rgba(15,15,40,0.55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; backdrop-filter: blur(2px); }
 .modal-box { background: #fff; border-radius: 18px; width: 100%; max-width: 480px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); font-family: 'Poppins', sans-serif; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
-.reset-box { max-width: 650px; border-top: 5px solid #16a34a; }
+.reset-box { max-width: 650px; border-top: 5px solid #3b82f6; }
 
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 1.4rem; border-bottom: 1px solid #f0f0f8; }
 .modal-header-left { display: flex; align-items: center; gap: 0.7rem; }
 .modal-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.reset-icon { background: #f0fdf4; color: #22c55e; }
+.reset-icon { background: #eff6ff; color: #3b82f6; }
 .modal-title { font-size: 1rem; font-weight: 600; color: #1e1d4c; }
 .modal-sub { font-size: 0.75rem; color: #9ca3af; }
 
@@ -538,8 +543,8 @@ input:focus, textarea:focus { border-color: #3E3D90; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.1rem 1.4rem; border-top: 1px solid #f0f0f8; }
 .btn-cancel { padding: 0.6rem 1.2rem; background: #fff; border: 1.5px solid #e8e8f0; border-radius: 10px; font-weight: 500; cursor: pointer; color: #6b7280; transition: all 0.15s; }
 .btn-submit { padding: 0.6rem 1.2rem; background: #3E3D90; color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(62,61,144,0.3); transition: all 0.15s; }
-.reset-submit { background: #16a34a; box-shadow: 0 4px 12px rgba(22,163,74,0.3); }
-.reset-submit:hover { background: #15803d; }
+.reset-submit { background: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+.reset-submit:hover { background: #2563eb; }
 
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.3s ease; }
 .modal-fade-enter, .modal-fade-leave-to { opacity: 0; }

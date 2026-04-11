@@ -90,12 +90,13 @@
                   <th>#</th>
                   <th>Nomor Polisi</th>
                   <th>Merk Truk</th>
+                  <th>Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="filteredList.length === 0 && !loading">
-                  <td colspan="4" class="empty-row">
+                  <td colspan="5" class="empty-row">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                       stroke-width="1.5">
                       <circle cx="11" cy="11" r="8" />
@@ -105,7 +106,7 @@
                   </td>
                 </tr>
                 <tr v-if="loading && filteredList.length === 0">
-                  <td colspan="4" class="empty-row">
+                  <td colspan="5" class="empty-row">
                     <div class="spinner-small"></div>
                     <p>Memuat data...</p>
                   </td>
@@ -118,9 +119,15 @@
                     </div>
                   </td>
                   <td>
-                    <span class="badge" :class="getMerkBadgeClass(k.jenis?.nama_jenis)">
+                    <span class="badge" :style="getMerkBadgeStyle(k.jenis?.nama_jenis)">
                       {{ k.jenis?.nama_jenis || '-' }}
                     </span>
+                  </td>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" :checked="k.status === 'Aktif' || k.status === 1 || k.status === true" @change="toggleStatus(k)">
+                      <span class="slider round"></span>
+                    </label>
                   </td>
                   <td>
                     <div class="action-btns">
@@ -276,13 +283,34 @@ export default {
       await this.deleteArmada(id)
     },
 
-    getMerkBadgeClass(jenis) {
-      const m = {
-        'Hino': 'badge-blue',
-        'Fuso': 'badge-red',
-        'Fusozu (Mitsubishi)': 'badge-yellow'
+    async toggleStatus(k) {
+      const isCurrentlyActive = k.status === 'Aktif' || k.status === 1 || k.status === true;
+      const newStatus = isCurrentlyActive ? 'Non-Aktif' : 'Aktif';
+      const originalStatus = k.status;
+      
+      k.status = newStatus; // optimistic
+      try {
+        const result = await this.updateArmada({
+          id: k.id,
+          data: {
+            nopol: k.nopol,
+            jenis_armada_id: k.jenis_armada_id,
+            status: newStatus
+          }
+        });
+        if (!result.success) throw new Error();
+      } catch (err) {
+        k.status = originalStatus;
+        alert('Gagal mengubah status kendaraan. Cek fungsi Update Backend.');
       }
-      return m[jenis] || 'badge-gray'
+    },
+
+    getMerkBadgeStyle(jenis) {
+      const merkData = this.dynamicMerkList.find(m => m.name === jenis)
+      if (merkData) {
+        return { backgroundColor: merkData.bg, color: merkData.color }
+      }
+      return { backgroundColor: '#f3f4f6', color: '#374151' }
     }
   }
 }
@@ -673,6 +701,16 @@ export default {
   background: #f3f4f6;
   color: #374151;
 }
+
+/* ===== TOGGLE SWITCH ===== */
+.switch { position: relative; display: inline-block; width: 36px; height: 20px; vertical-align: middle; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e2e8f0; transition: .3s; }
+.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+input:checked + .slider { background-color: #22c55e; }
+input:checked + .slider:before { transform: translateX(16px); }
+.slider.round { border-radius: 20px; }
+.slider.round:before { border-radius: 50%; }
 
 @media (max-width: 1024px) {
   .stats-grid {

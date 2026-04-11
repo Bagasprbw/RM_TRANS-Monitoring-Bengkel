@@ -6,5 +6,8 @@ export const kategoriKomponenApi = {
   },
   create(data) {
     return axios.post('/kategori_komponen', data)
+  },
+  delete(id) {
+    return axios.delete(`/kategori_komponen/${id}`)
   }
 }
