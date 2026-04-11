@@ -21,6 +21,11 @@ export const monitoringApi = {
     return axios.post('/monitoring_armada_aktif', data)
   },
 
+  // PUT update status monitoring armada
+  update(id, data) {
+    return axios.put(`/monitoring_armada_aktif/${id}`, data)
+  },
+
   // DELETE monitoring armada
   delete(id) {
     return axios.delete(`/monitoring_armada_aktif/${id}`)

@@ -91,6 +91,40 @@ class MonitoringArmadaAktifController extends Controller
         ]);
     }
 
+    public function update(Request $request, $id)
+    {
+        $monitoring = MonitoringArmadaAktif::find($id);
+        if (!$monitoring) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Monitoring kendaraan tidak ditemukan'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:aktif,nonaktif'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation error',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        $monitoring->status = $request->status;
+        $monitoring->save();
+
+        $monitoring->load('armada.jenis');
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Status monitoring berhasil diupdate',
+            'data'    => $monitoring
+        ]);
+    }
+
     public function destroy($id)
     {
         $monitoring = MonitoringArmadaAktif::find($id);

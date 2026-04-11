@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Monitoring Armada Aktif
     Route::get('monitoring_armada_aktif/available', [\App\Http\Controllers\Api\MonitoringAktif\MonitoringArmadaAktifController::class, 'availableArmada']);
+    Route::put('monitoring_armada_aktif/{monitoring}', [\App\Http\Controllers\Api\MonitoringAktif\MonitoringArmadaAktifController::class, 'update']);
     Route::apiResource('monitoring_armada_aktif', \App\Http\Controllers\Api\MonitoringAktif\MonitoringArmadaAktifController::class)->except(['create', 'edit', 'update']);
 
     // Log Kilometer

@@ -179,6 +179,17 @@ const actions = {
     } finally {
       commit('SET_LOADING', false)
     }
+  },
+  // Update monitoring status
+  async updateStatus({ commit }, { id, data }) {
+    try {
+      const response = await monitoringApi.update(id, data)
+      commit('UPDATE_MONITORING', response.data.data || response.data)
+      return { success: true }
+    } catch (error) {
+      console.error('Error updating monitoring status:', error)
+      return { success: false, error: error.message }
+    }
   }
 }
 
@@ -186,6 +197,14 @@ export default {
   namespaced: true,
   state,
   getters,
-  mutations,
+  mutations: {
+    ...mutations,
+    UPDATE_MONITORING(state, updatedData) {
+      const index = state.monitoringList.findIndex(item => item.id === updatedData.id)
+      if (index !== -1) {
+        state.monitoringList.splice(index, 1, updatedData)
+      }
+    }
+  },
   actions
 }

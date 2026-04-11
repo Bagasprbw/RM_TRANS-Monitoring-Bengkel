@@ -11,7 +11,7 @@ class ArmadaController extends Controller
     // GET semua data
     public function index()
     {
-        $data = Armada::with('jenis')->get();
+        $data = Armada::with(['jenis', 'monitoring'])->get();
 
         return response()->json($data);
     }

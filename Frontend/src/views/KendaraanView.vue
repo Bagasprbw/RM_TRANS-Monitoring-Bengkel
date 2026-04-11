@@ -124,10 +124,18 @@
                     </span>
                   </td>
                   <td>
-                    <label class="switch">
-                      <input type="checkbox" :checked="k.status === 'Aktif' || k.status === 1 || k.status === true" @change="toggleStatus(k)">
-                      <span class="slider round"></span>
-                    </label>
+                    <span 
+                      v-if="k.monitoring && k.monitoring.status === 'aktif'" 
+                      class="badge badge-green"
+                    >Aktif (Di-Monitor)</span>
+                    <span 
+                      v-else-if="k.monitoring && k.monitoring.status === 'nonaktif'" 
+                      class="badge badge-gray"
+                    >Non &nbsp;  Aktif</span>
+                    <span 
+                      v-else 
+                      class="badge badge-yellow"
+                    >Belum Di-Monitor</span>
                   </td>
                   <td>
                     <div class="action-btns">
@@ -281,28 +289,6 @@ export default {
 
     async deleteItem(id) {
       await this.deleteArmada(id)
-    },
-
-    async toggleStatus(k) {
-      const isCurrentlyActive = k.status === 'Aktif' || k.status === 1 || k.status === true;
-      const newStatus = isCurrentlyActive ? 'Non-Aktif' : 'Aktif';
-      const originalStatus = k.status;
-      
-      k.status = newStatus; // optimistic
-      try {
-        const result = await this.updateArmada({
-          id: k.id,
-          data: {
-            nopol: k.nopol,
-            jenis_armada_id: k.jenis_armada_id,
-            status: newStatus
-          }
-        });
-        if (!result.success) throw new Error();
-      } catch (err) {
-        k.status = originalStatus;
-        alert('Gagal mengubah status kendaraan. Cek fungsi Update Backend.');
-      }
     },
 
     getMerkBadgeStyle(jenis) {

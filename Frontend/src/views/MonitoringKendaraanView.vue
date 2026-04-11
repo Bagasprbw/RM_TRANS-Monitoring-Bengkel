@@ -53,13 +53,14 @@
                   <th>Plat Nomor</th>
                   <th>Merk Truk</th>
                   <th>Total KM</th>
+                  <th>Kondisi</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="filteredList.length === 0">
-                  <td colspan="5" class="empty-row">
+                  <td colspan="6" class="empty-row">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     <p>Tidak ada kendaraan ditemukan</p>
                   </td>
@@ -91,6 +92,12 @@
                     <span class="status-text" :class="getCriticalCount(item) > 0 ? 'text-warn' : 'text-ok'">
                       {{ getCriticalCount(item) > 0 ? 'Perlu Perhatian' : 'Normal' }}
                     </span>
+                  </td>
+                  <td @click.stop>
+                    <label class="switch">
+                      <input type="checkbox" :checked="item.status === 'aktif'" @change="toggleStatus(item)">
+                      <span class="slider round"></span>
+                    </label>
                   </td>
                   <td @click.stop>
                     <button class="icon-btn delete" @click="removeVehicle(item.id)" title="Hapus">
@@ -144,12 +151,30 @@ export default {
     this.fetchMonitoring()
   },
   methods: {
-    ...mapActions('monitoring', ['fetchMonitoring', 'deleteMonitoring']),
+    ...mapActions('monitoring', ['fetchMonitoring', 'deleteMonitoring', 'updateStatus']),
     async handleVehicleAdded() { 
       this.showAdd = false
     },
     async removeVehicle(id) {
       await this.deleteMonitoring(id)
+    },
+    async toggleStatus(item) {
+      const isAktif = item.status === 'aktif'
+      const newStatus = isAktif ? 'nonaktif' : 'aktif'
+      const originalStatus = item.status
+
+      item.status = newStatus // optimistic
+
+      try {
+        const result = await this.updateStatus({
+          id: item.id,
+          data: { status: newStatus }
+        })
+        if (!result.success) throw new Error(result.error)
+      } catch (e) {
+        item.status = originalStatus
+        alert('Gagal mengubah status monitoring kendaraan.')
+      }
     },
     formatNumber(n) { return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') },
     
@@ -172,6 +197,15 @@ export default {
 </style>
 
 <style scoped>
+/* ===== TOGGLE SWITCH ===== */
+.switch { position: relative; display: inline-block; width: 36px; height: 20px; vertical-align: middle; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e2e8f0; transition: .3s; }
+.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+input:checked + .slider { background-color: #22c55e; }
+input:checked + .slider:before { transform: translateX(16px); }
+.slider.round { border-radius: 20px; }
+.slider.round:before { border-radius: 50%; }
 .page-layout { display: flex; min-height: 100vh; font-family: 'Poppins', sans-serif; }
 .main-content { flex: 1; background: #f0f0f8; display: flex; flex-direction: column; min-width: 0; }
 
