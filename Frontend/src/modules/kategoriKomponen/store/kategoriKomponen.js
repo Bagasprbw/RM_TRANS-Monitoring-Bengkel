@@ -85,7 +85,10 @@ const actions = {
       dispatch('fetchKategori')
       return { success: true }
     } catch (error) {
-      const msg = error.response?.data?.message || 'Gagal menghapus kategori. Kategori ini kemungkinan besar masih digunakan (berelasi) dengan data lainnya.';
+      let msg = error.response?.data?.message || 'Gagal menghapus kategori.';
+      if (msg.includes('SQLSTATE') || msg.includes('Integrity constraint violation')) {
+         msg = 'Gagal menghapus kategori. Kategori ini sedang terpakai dan masih berelasi dengan komponen kendaraan lain.';
+      }
       Swal.fire('Tidak Dapat Dihapus', msg, 'error')
       return { success: false, error: msg }
     } finally {
