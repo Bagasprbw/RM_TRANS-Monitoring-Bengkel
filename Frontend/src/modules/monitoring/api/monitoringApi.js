@@ -5,6 +5,10 @@ export const monitoringApi = {
   getAll() {
     return axios.get('/monitoring_armada_aktif')
   },
+  
+  getReminders() {
+    return axios.get('/monitoring_armada_aktif/reminders')
+  },
 
   // GET detail armada by id
   getById(id) {

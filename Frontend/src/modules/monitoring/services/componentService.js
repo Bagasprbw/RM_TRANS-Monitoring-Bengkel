@@ -1,4 +1,4 @@
-import axios from '../core/axios.js'
+import axios from '@/core/axios'
 
 const componentService = {
   // Methods for monitoring components
@@ -16,6 +16,10 @@ const componentService = {
   
   deleteComponent(id) {
     return axios.delete(`/komponen_armada/${id}`)
+  },
+  
+  updateComponent(id, payload) {
+    return axios.put(`/komponen_armada/${id}`, payload)
   },
 
   // Categories (already partially handled in kategoriKomponen store, but useful here too)

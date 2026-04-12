@@ -20,6 +20,41 @@ class MonitoringArmadaAktifController extends Controller
         ]);
     }
 
+    public function reminders()
+    {
+        $monitoring = MonitoringArmadaAktif::with(['armada.jenis', 'komponen.kategori'])
+            ->where('status', 'aktif')
+            ->get();
+
+        $reminders = [];
+
+        foreach ($monitoring as $mon) {
+            foreach ($mon->komponen as $komp) {
+                $healthData = $komp->calculateHealth($mon->last_recorded_km);
+                
+                if ($healthData['health'] <= 15) {
+                    $reminders[] = [
+                        'id' => $komp->id,
+                        'monitoring_id' => $mon->id,
+                        'nopol' => $mon->armada->nopol ?? '-',
+                        'merk' => $mon->armada->jenis->nama_jenis ?? '-',
+                        'nama_komponen' => $komp->nama_komponen,
+                        'kategori' => $komp->kategori->nama_kategori ?? '-',
+                        'health' => $healthData['health'],
+                        'status' => $healthData['remaining'],
+                        'badgeClass' => $healthData['health'] <= 5 ? 'badge-red' : ($healthData['health'] <= 10 ? 'badge-orange' : 'badge-yellow'),
+                        'dotClass' => $healthData['health'] <= 5 ? 'dot-red' : ($healthData['health'] <= 10 ? 'dot-orange' : 'dot-yellow')
+                    ];
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $reminders
+        ]);
+    }
+
     public function availableArmada()
     {
         // Get all armadas that do NOT have active monitoring

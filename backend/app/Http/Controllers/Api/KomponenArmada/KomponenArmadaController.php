@@ -26,36 +26,11 @@ class KomponenArmadaController extends Controller
         $currentKm = $monitoring ? $monitoring->last_recorded_km : 0;
 
         $data = $components->map(function ($comp) use ($currentKm) {
-            $health = 100;
-            $remaining = '-';
-
-            if ($comp->tipe_pelacakan === 'km') {
-                $usedKm = $currentKm - ($comp->km_terakhir_perawatan ?? 0);
-                $target = $comp->target_km ?? 1;
-                $health = max(0, min(100, 100 - ($usedKm / $target * 100)));
-                $remaining = max(0, $target - $usedKm) . ' km lagi';
-            } elseif ($comp->tipe_pelacakan === 'days') {
-                $lastService = Carbon::parse($comp->tanggal_terakhir_perawatan ?? $comp->created_at);
-                $daysUsed = $lastService->diffInDays(Carbon::now());
-                $target = $comp->target_hari ?? 1;
-                $health = max(0, min(100, 100 - ($daysUsed / $target * 100)));
-                $remaining = max(0, $target - $daysUsed) . ' hari lagi';
-            } elseif ($comp->tipe_pelacakan === 'date') {
-                $targetDate = Carbon::parse($comp->target_tanggal);
-                $daysTotal = Carbon::parse($comp->tanggal_terakhir_perawatan ?? $comp->created_at)->diffInDays($targetDate);
-                $daysRemaining = Carbon::now()->diffInDays($targetDate, false);
-                
-                if ($daysTotal > 0) {
-                    $health = max(0, min(100, ($daysRemaining / $daysTotal * 100)));
-                } else {
-                    $health = $daysRemaining > 0 ? 100 : 0;
-                }
-                $remaining = $daysRemaining . ' hari tersisa';
-            }
-
+            $healthData = $comp->calculateHealth($currentKm);
+            
             $compArray = $comp->toArray();
-            $compArray['health'] = round($health, 1);
-            $compArray['remaining'] = $remaining;
+            $compArray['health'] = $healthData['health'];
+            $compArray['remaining'] = $healthData['remaining'];
 
             return $compArray;
         });

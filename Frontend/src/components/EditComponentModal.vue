@@ -78,7 +78,7 @@
 </template>
 
 <script>
-import componentService from '@/services/componentService.js'
+import componentService from '@/modules/monitoring/services/componentService'
 
 export default {
   name: 'EditComponentModal',

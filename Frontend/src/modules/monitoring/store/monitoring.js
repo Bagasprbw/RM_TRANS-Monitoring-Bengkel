@@ -6,6 +6,7 @@ const state = {
   monitoringList: [],
   availableArmadaList: [],
   currentMonitoring: null,
+  reminders: [],
   loading: false
 }
 
@@ -14,6 +15,7 @@ const getters = {
   monitoringList: (state) => state.monitoringList,
   availableArmadaList: (state) => state.availableArmadaList,
   currentMonitoring: (state) => state.currentMonitoring,
+  reminders: (state) => state.reminders,
   loading: (state) => state.loading
 }
 
@@ -33,6 +35,9 @@ const mutations = {
   },
   REMOVE_MONITORING(state, id) {
     state.monitoringList = state.monitoringList.filter(item => item.id !== id)
+  },
+  SET_REMINDERS(state, data) {
+    state.reminders = data
   },
   REMOVE_AVAILABLE_ARMADA(state, armadaId) {
     state.availableArmadaList = state.availableArmadaList.filter(item => item.id !== armadaId)
@@ -189,6 +194,21 @@ const actions = {
     } catch (error) {
       console.error('Error updating monitoring status:', error)
       return { success: false, error: error.message }
+    }
+  },
+
+  // Fetch reminders for dashboard
+  async fetchReminders({ commit }) {
+    commit('SET_LOADING', true)
+    try {
+      const response = await monitoringApi.getReminders()
+      commit('SET_REMINDERS', response.data.data || response.data)
+      return { success: true, data: response.data }
+    } catch (error) {
+      console.error('Error fetching reminders:', error)
+      return { success: false, error: error.message }
+    } finally {
+      commit('SET_LOADING', false)
     }
   }
 }

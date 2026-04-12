@@ -166,7 +166,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import componentService from '@/services/componentService.js'
+import componentService from '@/modules/monitoring/services/componentService'
 
 export default {
   name: 'AddComponentModal',

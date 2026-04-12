@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             JenisArmadaSeeder::class,
             ArmadaSeeder::class,
+            CategoryComponenSeeder::class,
         ]);
     }
 }

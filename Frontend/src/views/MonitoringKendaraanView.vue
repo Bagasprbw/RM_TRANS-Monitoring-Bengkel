@@ -69,8 +69,9 @@
                   v-else
                   v-for="item in filteredList"
                   :key="item.id"
-                  @click="$router.push('/monitoring-kendaraan/' + item.id)"
+                  @click="item.status === 'aktif' ? $router.push('/monitoring-kendaraan/' + item.id) : null"
                   class="clickable"
+                  :class="{ 'row-inactive': item.status !== 'aktif' }"
                 >
                   <td>
                     <div class="nopol-cell">
@@ -88,9 +89,9 @@
                     <span class="km-text">{{ formatNumber(item.last_recorded_km) }} <span class="km-unit">km</span></span>
                   </td>
                   <td>
-                    <span class="status-dot" :class="getCriticalCount(item) > 0 ? 'dot-warn' : 'dot-ok'"></span>
-                    <span class="status-text" :class="getCriticalCount(item) > 0 ? 'text-warn' : 'text-ok'">
-                      {{ getCriticalCount(item) > 0 ? 'Perlu Perhatian' : 'Normal' }}
+                    <span class="status-dot" :class="item.status === 'aktif' ? (getCriticalCount(item) > 0 ? 'dot-warn' : 'dot-ok') : 'dot-inactive'"></span>
+                    <span class="status-text" :class="item.status === 'aktif' ? (getCriticalCount(item) > 0 ? 'text-warn' : 'text-ok') : 'text-inactive'">
+                      {{ item.status === 'aktif' ? (getCriticalCount(item) > 0 ? 'Perlu Perhatian' : 'Aktif') : 'Non-aktif' }}
                     </span>
                   </td>
                   <td @click.stop>
@@ -124,6 +125,7 @@
 import Sidebar from '@/components/Sidebar.vue'
 import AddVehicleToMonitoringModal from '@/components/AddVehicleToMonitoringModal.vue'
 import { mapState, mapActions } from 'vuex'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'MonitoringKendaraanView',
@@ -138,12 +140,21 @@ export default {
     ...mapState('monitoring', ['monitoringList', 'loading']),
     filteredList() {
       if (!this.monitoringList) return []
-      if (!this.searchQuery) return this.monitoringList
-      const q = this.searchQuery.toLowerCase()
-      return this.monitoringList.filter(i => {
-        const nopol = i.armada?.nopol || i.plat_nomor || ''
-        const jenis = i.armada?.jenis?.nama_jenis || i.jenis_kendaraan || ''
-        return nopol.toLowerCase().includes(q) || jenis.toLowerCase().includes(q)
+      let list = this.monitoringList
+      if (this.searchQuery) {
+        const q = this.searchQuery.toLowerCase()
+        list = list.filter(i => {
+          const nopol = i.armada?.nopol || i.plat_nomor || ''
+          const jenis = i.armada?.jenis?.nama_jenis || i.jenis_kendaraan || ''
+          return nopol.toLowerCase().includes(q) || jenis.toLowerCase().includes(q)
+        })
+      }
+      
+      // Sort: aktif first, nonaktif last
+      return [...list].sort((a, b) => {
+        if (a.status === 'aktif' && b.status !== 'aktif') return -1
+        if (a.status !== 'aktif' && b.status === 'aktif') return 1
+        return 0
       })
     }
   },
@@ -161,19 +172,45 @@ export default {
     async toggleStatus(item) {
       const isAktif = item.status === 'aktif'
       const newStatus = isAktif ? 'nonaktif' : 'aktif'
-      const originalStatus = item.status
+      
+      const result = await Swal.fire({
+        title: isAktif ? 'Matikan Monitoring?' : 'Aktifkan Monitoring?',
+        text: isAktif 
+          ? 'Kendaraan ini tidak akan muncul di dashboard utama.' 
+          : 'Kendaraan ini akan kembali muncul di dashboard utama.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3E3D90',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: isAktif ? 'Ya, Matikan' : 'Ya, Aktifkan',
+        cancelButtonText: 'Batal'
+      })
 
+      if (!result.isConfirmed) return
+
+      const originalStatus = item.status
       item.status = newStatus // optimistic
 
       try {
-        const result = await this.updateStatus({
+        const res = await this.updateStatus({
           id: item.id,
           data: { status: newStatus }
         })
-        if (!result.success) throw new Error(result.error)
+        
+        if (res.success) {
+          Swal.fire({
+            title: 'Berhasil',
+            text: `Monitoring telah ${newStatus === 'aktif' ? 'diaktifkan' : 'dimatikan'}.`,
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+          })
+        } else {
+          throw new Error(res.error)
+        }
       } catch (e) {
         item.status = originalStatus
-        alert('Gagal mengubah status monitoring kendaraan.')
+        Swal.fire('Gagal', 'Gagal mengubah status monitoring.', 'error')
       }
     },
     formatNumber(n) { return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') },
@@ -256,9 +293,18 @@ input:checked + .slider:before { transform: translateX(16px); }
 .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
 .dot-ok { background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,0.5); }
 .dot-warn { background: #ef4444; box-shadow: 0 0 5px rgba(239,68,68,0.5); }
+.dot-inactive { background: #94a3b8; }
 .status-text { font-size: 0.8rem; font-weight: 500; }
 .text-ok { color: #16a34a; }
 .text-warn { color: #dc2626; }
+.text-inactive { color: #94a3b8; }
+
+.row-inactive { background: #fcfcfd; }
+.row-inactive td { color: #9ca3af; }
+.row-inactive .nopol-text, .row-inactive .km-text { color: #94a3b8; }
+.row-inactive .merk-chip { opacity: 0.5; background: #f1f5f9; }
+.row-inactive.clickable { cursor: default; }
+.row-inactive.clickable:hover td { background: #fcfcfd; }
 
 .empty-row { text-align: center; padding: 3rem !important; color: #9ca3af; }
 .empty-row svg { margin: 0 auto 0.5rem; display: block; }

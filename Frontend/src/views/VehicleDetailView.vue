@@ -96,7 +96,7 @@
                   <span class="comp-name">{{ comp.nama_komponen }}</span>
                   <span class="comp-category">{{ comp.kategori?.nama_kategori }}</span>
                   <span v-if="comp.has_identity" class="identity-badge" :title="comp.detail[0]?.nomor_seri">
-                    ID: {{ comp.detail[0]?.nomor_seri || '-' }}
+                    No seri: {{ comp.detail[0]?.nomor_seri || '-' }}
                   </span>
                 </div>
                 <div class="progress-bar">
@@ -246,7 +246,7 @@ import Sidebar from '@/components/Sidebar.vue'
 import AddCategoryModal from '@/components/AddCategoryModal.vue'
 import AddComponentModal from '@/components/AddComponentModal.vue'
 import UpdateKilometerModal from '@/components/UpdateKilometerModal.vue'
-import componentService from '@/services/componentService.js'
+import componentService from '@/modules/monitoring/services/componentService'
 import { mapState, mapActions } from 'vuex'
 import Swal from 'sweetalert2'
 

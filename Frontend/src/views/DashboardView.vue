@@ -64,7 +64,8 @@
               <thead>
                 <tr>
                   <th>Kendaraan</th>
-                  <th>Jenis Servis</th>
+                  <th>Komponen</th>
+                  <th>Kategori</th>
                   <th class="text-right">Status</th>
                 </tr>
               </thead>
@@ -72,19 +73,26 @@
                 <tr
                   v-for="r in reminders"
                   :key="r.id"
-                  @click="$router.push('/monitoring-kendaraan/1')"
+                  @click="$router.push('/monitoring-kendaraan/' + r.monitoring_id)"
                   class="clickable"
                 >
                   <td>
                     <div class="vehicle-cell">
                       <div class="vehicle-dot" :class="r.dotClass"></div>
-                      <span class="fw-semibold">{{ r.vehicle }}</span>
+                      <div>
+                        <span class="fw-semibold">{{ r.nopol }}</span>
+                        <div style="font-size: 0.7rem; color: #9ca3af;">{{ r.merk }}</div>
+                      </div>
                     </div>
                   </td>
                   <td>
-                    <span class="component-chip">{{ r.component }}</span>
+                    <div class="fw-semibold" style="font-size: 0.82rem;">{{ r.nama_komponen }}</div>
+                  </td>
+                  <td>
+                    <span class="component-chip">{{ r.kategori }}</span>
                   </td>
                   <td class="text-right">
+                    <div style="font-size: 0.75rem; font-weight: 700; color: #dc2626; margin-bottom: 2px;">{{ r.health }}%</div>
                     <span class="badge" :class="r.badgeClass">{{ r.status }}</span>
                   </td>
                 </tr>
@@ -107,11 +115,11 @@ export default {
   components: { Sidebar },
   data() {
     return {
-      reminders: [] // Ini nanti bisa dinamis juga dari API monitoring
     }
   },
   computed: {
     ...mapState('armada', ['loading']),
+    ...mapState('monitoring', ['reminders']),
     ...mapGetters('armada', ['armadaList']),
 
     todayDate() {
@@ -143,10 +151,13 @@ export default {
   },
   methods: {
     ...mapActions('armada', ['fetchArmada']),
+    ...mapActions('monitoring', ['fetchReminders']),
 
     async fetchData() {
-      await this.fetchArmada()
-      // Fetch data lain jika ada
+      await Promise.all([
+        this.fetchArmada(),
+        this.fetchReminders()
+      ])
     },
 
     refresh() {
@@ -464,7 +475,9 @@ body { font-family: 'Poppins', sans-serif; }
   .content-body { padding: 1rem; gap: 1rem; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
   .table thead th:nth-child(2),
-  .table tbody td:nth-child(2) { display: none; }
+  .table tbody td:nth-child(2),
+  .table thead th:nth-child(3),
+  .table tbody td:nth-child(3) { display: none; }
   .table thead th,
   .table tbody td { padding: 0.75rem 1rem; }
 }
