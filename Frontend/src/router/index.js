@@ -45,6 +45,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/riwayat-aktivitas',
+    name: 'RiwayatAktivitas',
+    component: () => import('@/views/MaintenanceHistoryView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '*',
     redirect: '/dashboard'
   }
