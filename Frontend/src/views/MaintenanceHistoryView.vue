@@ -43,6 +43,17 @@
                 Filter
               </button>
               <button class="btn-secondary" @click="resetFilters" :disabled="loading">Reset</button>
+              <button class="btn-success" @click="handleExport" :disabled="loading || exporting">
+                <svg v-if="!exporting" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span v-else class="loader-small"></span>
+                Export Excel
+              </button>
             </div>
           </div>
         </div>
@@ -209,6 +220,7 @@
 import Sidebar from '@/components/Sidebar.vue'
 import { mapState, mapActions } from 'vuex'
 import axios from '@/core/axios'
+import ExcelExportService from '@/services/ExcelExportService'
 
 export default {
   name: 'MaintenanceHistoryView',
@@ -217,6 +229,7 @@ export default {
     return {
       loading: false,
       history: [],
+      exporting: false,
       filters: {
         category_id: '',
         search: '',
@@ -275,6 +288,33 @@ export default {
         this.loading = false
       }
     },
+    async handleExport() {
+      this.exporting = true
+      try {
+        // Fetch all data matching current filters
+        const params = {
+          export: 'true',
+          category_id: this.filters.category_id,
+          search: this.filters.search
+        }
+        const res = await axios.get('/riwayat_perawatan', { params })
+        if (res.data.status === 'success') {
+          const allData = res.data.data
+          const categoryName = this.filters.category_id 
+            ? this.kategoriList.find(c => c.id === this.filters.category_id)?.nama_kategori 
+            : 'Semua Kategori'
+          
+          await ExcelExportService.exportRiwayat(allData, {
+            categoryName,
+            filters: this.filters
+          })
+        }
+      } catch (err) {
+        console.error('Export error:', err)
+      } finally {
+        this.exporting = false
+      }
+    },
     resetFilters() {
       this.filters = { category_id: '', search: '', limit: 15 }
       this.fetchHistory(1)
@@ -284,7 +324,20 @@ export default {
     },
     formatDate(date) {
       if (!date) return '-'
-      return new Date(date).toLocaleDateString('id-ID', {
+      
+      // Fix timezone issue when parsing YYYY-MM-DD
+      const dateObj = new Date(date)
+      if (isNaN(dateObj.getTime())) return date
+      
+      // If it's a simple date string (YYYY-MM-DD), the time will be 00:00:00 UTC
+      // which shows as day before in WIB. We force local time or use parts.
+      const d = date.split('T')[0].split('-')
+      if (d.length === 3) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        return `${d[2]} ${months[parseInt(d[1]) - 1]} ${d[0]}`
+      }
+
+      return dateObj.toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'short',
         year: 'numeric'
@@ -340,6 +393,10 @@ select:focus, input:focus { border-color: #3E3D90; box-shadow: 0 0 0 3px rgba(62
 .btn-secondary:hover:not(:disabled) { background: #f5f5fb; color: #374151; }
 
 .loader-small { width: 14px; height: 14px; border: 2px solid #fff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
+
+.btn-success { display: flex; align-items: center; gap: 6px; padding: 0.65rem 1.25rem; background: #059669; border: none; border-radius: 10px; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(5,150,105,0.3); transition: all 0.15s; }
+.btn-success:hover:not(:disabled) { background: #047857; transform: translateY(-1px); }
+.btn-success:disabled { opacity: 0.7; cursor: not-allowed; }
 @keyframes rotation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* TABLE HEADER */

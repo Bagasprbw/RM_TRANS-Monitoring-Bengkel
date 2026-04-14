@@ -71,8 +71,8 @@ class KomponenArmadaController extends Controller
                 'target_km' => $request->target_km,
                 'target_tanggal' => $request->target_tanggal,
                 'target_hari' => $request->target_hari,
-                'km_terakhir_perawatan' => $request->tipe_pelacakan === 'km' ? $monitoring->last_recorded_km : null,
-                'tanggal_terakhir_perawatan' => Carbon::now()->toDateString(),
+                'km_terakhir_perawatan' => $monitoring->last_recorded_km,
+                'tanggal_terakhir_perawatan' => null,
                 'status' => 'active',
                 'has_identity' => $request->has_identity ?? false,
             ]);
@@ -110,13 +110,14 @@ class KomponenArmadaController extends Controller
 
             $monitoring = $komponen->monitoring;
             
-            $currentDetail = $komponen->detail->first();
+            $currentDetail = $komponen->detail()->latest('id')->first();
+
+            $tanggal_pelepasan = $request->input('tanggal_pelepasan') ?: Carbon::now()->toDateString();
 
             // 1. Update Old Detail with Release Date
             if ($currentDetail) {
                 $currentDetail->update([
-                    'tanggal_pelepasan' => $request->tanggal_pelepasan ?? Carbon::now()->toDateString(),
-                    // Enum fix: set to null or valid enum value defined in migration
+                    'tanggal_pelepasan' => $tanggal_pelepasan,
                     'status_ban_bekas' => null 
                 ]);
             }
@@ -126,17 +127,29 @@ class KomponenArmadaController extends Controller
                 'komponen_armada_id' => $komponen->id,
                 'detail_komponen_armada_id' => $currentDetail ? $currentDetail->id : null,
                 'km_saat_selesai' => $monitoring ? $monitoring->last_recorded_km : 0,
-                'tanggal_selesai' => Carbon::now()->toDateString(),
+                'tanggal_selesai' => $tanggal_pelepasan,
                 'jumlah_liter' => $request->jumlah_liter ?? null,
                 'catatan' => $request->catatan,
             ]);
 
             // 3. Update Komponen Baseline
-            $komponen->update([
+            $updateData = [
                 'km_terakhir_perawatan' => $monitoring ? $monitoring->last_recorded_km : 0,
-                'tanggal_terakhir_perawatan' => Carbon::now()->toDateString(),
+                'tanggal_terakhir_perawatan' => $tanggal_pelepasan,
                 'status' => 'active'
-            ]);
+            ];
+
+            // If it's date based or days based we want to advance the target_tanggal/baseline correctly
+            if ($komponen->tipe_pelacakan === 'date' && $komponen->target_hari > 0) {
+                $baseDate = Carbon::parse($tanggal_pelepasan);
+                $updateData['target_tanggal'] = $baseDate->addDays($komponen->target_hari)->toDateString();
+            }
+
+            // Also allow manual override from request if provided
+            if ($request->has('target_km')) $updateData['target_km'] = $request->target_km;
+            if ($request->has('target_tanggal')) $updateData['target_tanggal'] = $request->target_tanggal;
+
+            $komponen->update($updateData);
 
             // 4. Handle Identity Detail change (soalnya ada no seri baru)
             if ($request->has('new_detail') && !empty($request->new_detail['nomor_seri'])) {
