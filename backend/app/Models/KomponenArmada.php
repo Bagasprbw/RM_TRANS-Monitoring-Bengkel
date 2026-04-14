@@ -66,27 +66,34 @@ class KomponenArmada extends Model
         $remaining = '-';
 
         if ($this->tipe_pelacakan === 'km') {
-            $usedKm = $currentKm - ($this->km_terakhir_perawatan ?? 0);
+            $usedKm = max(0, $currentKm - ($this->km_terakhir_perawatan ?? 0));
             $target = $this->target_km ?? 1;
             $health = max(0, min(100, 100 - ($usedKm / $target * 100)));
-            $remaining = max(0, $target - $usedKm) . ' km lagi';
+            $remaining = (int) max(0, $target - $usedKm) . ' km lagi';
         } elseif ($this->tipe_pelacakan === 'days') {
-            $lastService = Carbon::parse($this->tanggal_terakhir_perawatan ?? $this->created_at);
-            $daysUsed = $lastService->diffInDays(Carbon::now());
+            $lastService = Carbon::parse($this->tanggal_terakhir_perawatan ?? $this->created_at)->startOfDay();
+            $now = Carbon::now()->startOfDay();
+            
+            // "kalau belum ganti tanggal belum dikurangi"
+            $daysUsed = $now->gt($lastService) ? (int) $lastService->diffInDays($now) : 0;
+            
             $target = $this->target_hari ?? 1;
             $health = max(0, min(100, 100 - ($daysUsed / $target * 100)));
-            $remaining = max(0, $target - $daysUsed) . ' hari lagi';
+            $remaining = (int) max(0, $target - $daysUsed) . ' hari lagi';
         } elseif ($this->tipe_pelacakan === 'date') {
-            $targetDate = Carbon::parse($this->target_tanggal);
-            $daysTotal = Carbon::parse($this->tanggal_terakhir_perawatan ?? $this->created_at)->diffInDays($targetDate);
-            $daysRemaining = Carbon::now()->diffInDays($targetDate, false);
+            $targetDate = Carbon::parse($this->target_tanggal)->startOfDay();
+            $lastService = Carbon::parse($this->tanggal_terakhir_perawatan ?? $this->created_at)->startOfDay();
+            $now = Carbon::now()->startOfDay();
+
+            $daysTotal = (int) $lastService->diffInDays($targetDate);
+            $daysRemaining = (int) $now->diffInDays($targetDate, false);
             
             if ($daysTotal > 0) {
                 $health = max(0, min(100, ($daysRemaining / $daysTotal * 100)));
             } else {
                 $health = $daysRemaining > 0 ? 100 : 0;
             }
-            $remaining = $daysRemaining . ' hari tersisa';
+            $remaining = (int) $daysRemaining . ' hari tersisa';
         }
 
         return [

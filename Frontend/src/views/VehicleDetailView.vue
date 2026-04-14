@@ -115,6 +115,9 @@
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                   Reset
                 </button>
+                <button class="icon-btn info" title="Detail" @click="openDetailModal(comp)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
                 <button class="icon-btn blue" title="Edit" @click="selectedComponent = comp; showEditComponent = true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
@@ -165,7 +168,7 @@
 
                     <div class="grid-form">
                         <div class="form-group">
-                            <label>Tgl Lepas (Lama) <span class="req">*</span></label>
+                            <label>Tgl Lepas/Ganti <span class="req">*</span></label>
                             <input v-model="resetForm.tanggal_pelepasan" type="date" />
                         </div>
                         <div v-if="resettingComp?.kategori?.nama_kategori.toLowerCase().includes('oli')" class="form-group">
@@ -238,6 +241,93 @@
             </div>
         </div>
     </transition>
+
+    <!-- Detail Component Modal -->
+    <transition name="modal-fade">
+        <div v-if="showDetailModal" class="modal-overlay" @click.self="showDetailModal = false">
+            <div class="modal-box detail-box">
+                <div class="modal-header">
+                    <div class="modal-header-left">
+                        <div class="modal-icon detail-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="modal-title">Detail Komponen</h3>
+                            <p class="modal-sub">{{ viewingComp?.nama_komponen }}</p>
+                        </div>
+                    </div>
+                    <button class="close-btn" @click="showDetailModal = false">&times;</button>
+                </div>
+                <div class="modal-body detail-modal-body">
+                    <div class="detail-section">
+                        <h4 class="detail-section-title">Informasi Dasar</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Nama Komponen</label>
+                                <span>{{ viewingComp?.nama_komponen }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Kategori</label>
+                                <span class="badge">{{ viewingComp?.kategori?.nama_kategori }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Tanggal Pasang</label>
+                                <span>{{ viewingComp?.detail?.[0]?.tanggal_pemasangan || viewingComp?.tanggal_terakhir_perawatan || formatDate(viewingComp?.created_at) || '-' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Tipe Pelacakan</label>
+                                <span style="text-transform: uppercase;">{{ viewingComp?.tipe_pelacakan }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="viewingComp?.has_identity && viewingComp?.detail?.[0]" class="detail-section mt-4">
+                        <h4 class="detail-section-title">Identitas Detail</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item" v-if="viewingComp.detail[0].nomor_seri">
+                                <label>No Seri</label>
+                                <span>{{ viewingComp.detail[0].nomor_seri }}</span>
+                            </div>
+                            <div class="detail-item" v-if="viewingComp.detail[0].nomor_stamp && viewingComp.kategori?.nama_kategori.toLowerCase().includes('ban')">
+                                <label>No Stamp</label>
+                                <span>{{ viewingComp.detail[0].nomor_stamp }}</span>
+                            </div>
+                            <div class="detail-item" v-if="viewingComp.detail[0].merk_tipe">
+                                <label>Merk / Tipe</label>
+                                <span>{{ viewingComp.detail[0].merk_tipe }}</span>
+                            </div>
+                            <div class="detail-item" v-if="viewingComp.detail[0].pemasok">
+                                <label>Pemasok</label>
+                                <span>{{ viewingComp.detail[0].pemasok }}</span>
+                            </div>
+                            <div class="detail-item" v-if="viewingComp.detail[0].harga > 0">
+                                <label>Harga</label>
+                                <span>Rp {{ formatNumber(viewingComp.detail[0].harga) }}</span>
+                            </div>
+                            <div class="detail-item" v-if="viewingComp.detail[0].km_pemasangan > 0">
+                                <label>KM Pasang</label>
+                                <span>{{ formatNumber(viewingComp.detail[0].km_pemasangan) }} km</span>
+                            </div>
+                            <!-- Ban specific fields -->
+                            <template v-if="viewingComp.kategori?.nama_kategori.toLowerCase().includes('ban')">
+                                <div class="detail-item" v-if="viewingComp.detail[0].jenis_ban">
+                                    <label>Jenis Ban</label>
+                                    <span>{{ viewingComp.detail[0].jenis_ban }}</span>
+                                </div>
+                                <div class="detail-item" v-if="viewingComp.detail[0].ukuran">
+                                    <label>Ukuran</label>
+                                    <span>{{ viewingComp.detail[0].ukuran }}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" @click="showDetailModal = false">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </transition>
   </div>
 </template>
 
@@ -262,9 +352,11 @@ export default {
       showEditComponent: false,
       showAddCategory: false,
       showResetModal: false,
+      showDetailModal: false,
       loadingComponents: false,
       components: [],
       resettingComp: null,
+      viewingComp: null,
       resetForm: {
           catatan: '',
           jumlah_liter: null,
@@ -322,6 +414,14 @@ export default {
     ...mapActions('monitoring', ['fetchMonitoringDetail']),
     ...mapActions('kategoriKomponen', ['fetchKategori']),
     formatNumber(n) { return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') },
+    formatDate(dateStr) {
+        if (!dateStr) return null;
+        try {
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            return d.toISOString().split('T')[0];
+        } catch (e) { return dateStr; }
+    },
     getIconClass(h) { if (h < 30) return 'icon-red'; if (h < 60) return 'icon-orange'; return 'icon-green' },
     getBarClass(h) { if (h < 30) return 'bg-red'; if (h < 60) return 'bg-orange'; return 'bg-green' },
     getHealthClass(h) { if (h < 30) return 'text-red'; if (h < 60) return 'text-orange'; return 'text-green' },
@@ -343,9 +443,21 @@ export default {
         this.loadComponents(); // update health based on new KM
     },
 
+    openDetailModal(comp) {
+        this.viewingComp = comp;
+        this.showDetailModal = true;
+    },
+
     openResetModal(comp) {
         this.resettingComp = comp;
-        const today = new Date().toISOString().substr(0, 10);
+        
+        // Get local date in YYYY-MM-DD format
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const today = `${year}-${month}-${day}`;
+        
         this.resetForm = {
             catatan: '',
             jumlah_liter: null,
@@ -512,6 +624,7 @@ export default {
 .reset-btn:hover { background: #dcfce7; transform: translateY(-1px); }
 
 .icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; border-radius: 8px; cursor: pointer; color: #b0b0c8; transition: all 0.15s; }
+.icon-btn.info:hover { color: #3b82f6; background: #eff6ff; }
 .icon-btn.blue:hover { color: #3E3D90; background: #f0f0fb; }
 .icon-btn.delete:hover { color: #ef4444; background: #fff0f0; }
 
@@ -524,10 +637,27 @@ export default {
 .modal-header-left { display: flex; align-items: center; gap: 0.7rem; }
 .modal-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .reset-icon { background: #eff6ff; color: #3b82f6; }
+.detail-icon { background: #f0f0fb; color: #3E3D90; }
 .modal-title { font-size: 1rem; font-weight: 600; color: #1e1d4c; }
 .modal-sub { font-size: 0.75rem; color: #9ca3af; }
 
+.close-btn { background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; padding: 0.5rem; line-height: 1; }
+.close-btn:hover { color: #3e3d90; }
+
 .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; overflow-y: auto; flex: 1; }
+.detail-modal-body { gap: 1.5rem; background: #f8fafc; }
+
+.detail-section { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; }
+.detail-section-title { font-size: 0.75rem; font-weight: 700; color: #3E3D90; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+
+.detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.detail-item { display: flex; flex-direction: column; gap: 4px; }
+.detail-item label { font-size: 0.65rem; color: #94a3b8; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.detail-item span { font-size: 0.85rem; font-weight: 600; color: #1e1d4c; }
+.detail-item .badge { display: inline-block; padding: 2px 8px; background: #f1f5f9; border-radius: 4px; font-size: 0.75rem; color: #475569; width: fit-content; }
+
+.mt-4 { margin-top: 1rem; }
+
 .reset-desc { font-size: 0.85rem; color: #4b5563; line-height: 1.5; }
 
 .form-group { display: flex; flex-direction: column; gap: 5px; }

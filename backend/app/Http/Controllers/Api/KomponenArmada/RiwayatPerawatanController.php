@@ -12,7 +12,7 @@ class RiwayatPerawatanController extends Controller
     {
         $query = RiwayatPerawatanKomponen::with([
             'komponen.kategori',
-            'komponen.monitoring.armada',
+            'komponen.monitoring.armada.jenis',
             'detailKomponen'
         ]);
 
@@ -33,9 +33,14 @@ class RiwayatPerawatanController extends Controller
             });
         }
 
-        $history = $query->orderBy('tanggal_selesai', 'desc')
-                        ->orderBy('id', 'desc')
-                        ->paginate($request->limit ?? 15);
+        $query->orderBy('tanggal_selesai', 'desc')
+                        ->orderBy('id', 'desc');
+
+        if ($request->has('export') && $request->export == 'true') {
+            $history = $query->get();
+        } else {
+            $history = $query->paginate($request->limit ?? 15);
+        }
 
         return response()->json([
             'status' => 'success',
