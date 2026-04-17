@@ -33,6 +33,14 @@ class RiwayatPerawatanController extends Controller
             });
         }
 
+        if ($request->has('date_from') && $request->date_from != '') {
+            $query->whereDate('tanggal_selesai', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && $request->date_to != '') {
+            $query->whereDate('tanggal_selesai', '<=', $request->date_to);
+        }
+
         $query->orderBy('tanggal_selesai', 'desc')
                         ->orderBy('id', 'desc');
 
