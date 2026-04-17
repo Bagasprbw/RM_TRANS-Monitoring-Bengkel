@@ -22,6 +22,14 @@
                 </option>
               </select>
             </div>
+            <div class="filter-group">
+              <label>Dari Tanggal</label>
+              <input v-model="filters.date_from" type="date" @change="fetchHistory(1)" />
+            </div>
+            <div class="filter-group">
+              <label>Sampai Tanggal</label>
+              <input v-model="filters.date_to" type="date" @change="fetchHistory(1)" />
+            </div>
             <div class="filter-group search-group">
               <label>Cari Data</label>
               <div class="search-input-wrap">
@@ -233,6 +241,8 @@ export default {
       filters: {
         category_id: '',
         search: '',
+        date_from: '',
+        date_to: '',
         limit: 15
       },
       pagination: {
@@ -268,6 +278,8 @@ export default {
           page,
           category_id: this.filters.category_id,
           search: this.filters.search,
+          date_from: this.filters.date_from,
+          date_to: this.filters.date_to,
           limit: this.filters.limit
         }
         const res = await axios.get('/riwayat_perawatan', { params })
@@ -295,7 +307,9 @@ export default {
         const params = {
           export: 'true',
           category_id: this.filters.category_id,
-          search: this.filters.search
+          search: this.filters.search,
+          date_from: this.filters.date_from,
+          date_to: this.filters.date_to
         }
         const res = await axios.get('/riwayat_perawatan', { params })
         if (res.data.status === 'success') {
@@ -316,7 +330,7 @@ export default {
       }
     },
     resetFilters() {
-      this.filters = { category_id: '', search: '', limit: 15 }
+      this.filters = { category_id: '', search: '', date_from: '', date_to: '', limit: 15 }
       this.fetchHistory(1)
     },
     calculateNo(index) {

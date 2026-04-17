@@ -39,17 +39,17 @@ export default class ExcelExportService {
     const normalizedCat = (categoryName || '').toLowerCase();
 
     if (normalizedCat.includes('ban')) {
-      this.setupBanLayout(worksheet, data, headerStyle, cellStyle);
+      this.setupBanLayout(worksheet, data, headerStyle, cellStyle, filters);
     } else if (normalizedCat.includes('filter')) {
-      this.setupFilterLayout(worksheet, data, headerStyle, cellStyle);
+      this.setupFilterLayout(worksheet, data, headerStyle, cellStyle, filters);
     } else if (normalizedCat.includes('oli')) {
       // If category is "Oli", we try to show both layouts if relevant data exists
       // or a combined layout that handles Mesin, Transmisi, Gardan.
-      this.setupCombinedOliLayout(worksheet, data, headerStyle, cellStyle);
+      this.setupCombinedOliLayout(worksheet, data, headerStyle, cellStyle, filters);
     } else if (normalizedCat.includes('accu') || normalizedCat.includes('aki')) {
-      this.setupAccuLayout(worksheet, data, headerStyle, cellStyle);
+      this.setupAccuLayout(worksheet, data, headerStyle, cellStyle, filters);
     } else {
-      this.setupDefaultLayout(worksheet, data, headerStyle, cellStyle);
+      this.setupDefaultLayout(worksheet, data, headerStyle, cellStyle, filters);
     }
 
     // Generate buffer
@@ -58,10 +58,17 @@ export default class ExcelExportService {
     saveAs(new Blob([buffer]), fileName);
   }
 
-  static setupBanLayout(ws, data, hStyle, cStyle) {
+  static setupBanLayout(ws, data, hStyle, cStyle, filters) {
     ws.mergeCells('A1:M1');
     ws.getCell('A1').value = 'BAN TERPASANG';
     ws.getCell('A1').style = { ...hStyle, font: { ...hStyle.font, size: 14 } };
+    
+    // Add Period Subtitle if exists
+    if (filters?.date_from || filters?.date_to) {
+      ws.mergeCells('A2:M2');
+      ws.getCell('A2').value = `Periode: ${this.formatDate(filters.date_from)} s/d ${this.formatDate(filters.date_to)}`;
+      ws.getCell('A2').style = { ...hStyle, fill: { ...hStyle.fill, fgColor: { argb: '7C3AED' } }, font: { ...hStyle.font, size: 10 } };
+    }
 
     const headers = [
       'NO', 'NOPOL', 'JENIS KENDARAAN', 'JENIS (ORI/VULK)', 'SUPLIYER', 'MERK/TYPE/UK', 
@@ -126,14 +133,21 @@ export default class ExcelExportService {
     ];
   }
 
-  static setupFilterLayout(ws, data, hStyle, cStyle) {
+  static setupFilterLayout(ws, data, hStyle, cStyle, filters) {
     ws.mergeCells('A1:D1');
     ws.getCell('A1').value = 'Monitoring Filter Udara';
     ws.getCell('A1').style = { ...hStyle, font: { ...hStyle.font, size: 14 } };
 
+    if (filters?.date_from || filters?.date_to) {
+      ws.mergeCells('A2:D2');
+      ws.getCell('A2').value = `Periode: ${this.formatDate(filters.date_from)} s/d ${this.formatDate(filters.date_to)}`;
+      ws.getCell('A2').style = { ...hStyle, font: { ...hStyle.font, size: 10 } };
+    }
+
     const headers = ['NO', 'NOPOL', 'JENIS ARMADA', 'PENGGANTIAN TERAKHIR'];
-    ws.getRow(2).values = headers;
-    ws.getRow(2).eachCell((cell) => { cell.style = hStyle; });
+    const startRow = (filters?.date_from || filters?.date_to) ? 3 : 2;
+    ws.getRow(startRow).values = headers;
+    ws.getRow(startRow).eachCell((cell) => { cell.style = hStyle; });
 
     data.forEach((row, i) => {
       const r = ws.addRow([
@@ -148,7 +162,7 @@ export default class ExcelExportService {
     ws.columns = [{ width: 5 }, { width: 15 }, { width: 25 }, { width: 25 }];
   }
 
-  static setupCombinedOliLayout(ws, data, hStyle, cStyle) {
+  static setupCombinedOliLayout(ws, data, hStyle, cStyle, filters) {
     // 1. OLI MESIN SECTION
     const dataMesin = data.filter(d => {
       const n = (d.komponen?.nama_komponen || '').toLowerCase();
@@ -160,6 +174,14 @@ export default class ExcelExportService {
     });
 
     let currentRow = 1;
+
+    // Add Period at the top if exists
+    if (filters?.date_from || filters?.date_to) {
+      ws.mergeCells(`A${currentRow}:G${currentRow}`);
+      ws.getCell(`A${currentRow}`).value = `Periode Export: ${this.formatDate(filters.date_from)} s/d ${this.formatDate(filters.date_to)}`;
+      ws.getCell(`A${currentRow}`).style = { ...hStyle, font: { ...hStyle.font, size: 11 } };
+      currentRow++;
+    }
 
     if (dataMesin.length > 0) {
       ws.mergeCells(`A${currentRow}:F${currentRow}`);
@@ -254,19 +276,30 @@ export default class ExcelExportService {
     ];
   }
 
-  static setupAccuLayout(ws, data, hStyle, cStyle) {
+  static setupAccuLayout(ws, data, hStyle, cStyle, filters) {
     ws.mergeCells('A1:I1');
     ws.getCell('A1').value = 'MONITORING PENGGUNAAN ACCU';
     ws.getCell('A1').style = { ...hStyle, font: { ...hStyle.font, size: 14 } };
 
-    ws.mergeCells('D2:E2'); ws.getCell('D2').value = 'NO SERI';
-    ws.mergeCells('F2:G2'); ws.getCell('F2').value = 'TGL PEMASANGAN';
-    ws.mergeCells('H2:I2'); ws.getCell('H2').value = 'TGL HABIS';
-    [ws.getCell('D2'), ws.getCell('F2'), ws.getCell('H2')].forEach(c => c.style = hStyle);
+    let currentRow = 2;
+    if (filters?.date_from || filters?.date_to) {
+      ws.mergeCells(`A${currentRow}:I${currentRow}`);
+      ws.getCell(`A${currentRow}`).value = `Periode: ${this.formatDate(filters.date_from)} s/d ${this.formatDate(filters.date_to)}`;
+      ws.getCell(`A${currentRow}`).style = { ...hStyle, font: { ...hStyle.font, size: 11 } };
+      currentRow++;
+    }
+
+    const startSecondary = currentRow;
+    ws.mergeCells(`D${startSecondary}:E${startSecondary}`); ws.getCell(`D${startSecondary}`).value = 'NO SERI';
+    ws.mergeCells(`F${startSecondary}:G${startSecondary}`); ws.getCell(`F${startSecondary}`).value = 'TGL PEMASANGAN';
+    ws.mergeCells(`H${startSecondary}:I${startSecondary}`); ws.getCell(`H${startSecondary}`).value = 'TGL HABIS';
+    [ws.getCell(`D${startSecondary}`), ws.getCell(`F${startSecondary}`), ws.getCell(`H${startSecondary}`)].forEach(c => c.style = hStyle);
+    currentRow++;
 
     const headers = ['NO', 'NOPOL', 'JENIS KENDARAAN', 'KIRI', 'KANAN', 'KIRI', 'KANAN', 'KIRI', 'KANAN'];
-    ws.getRow(3).values = headers;
-    ws.getRow(3).eachCell((cell) => { cell.style = hStyle; });
+    ws.getRow(currentRow).values = headers;
+    ws.getRow(currentRow).eachCell((cell) => { cell.style = hStyle; });
+    currentRow++;
 
     const grouped = {};
     data.forEach(row => {
@@ -322,10 +355,20 @@ export default class ExcelExportService {
     ];
   }
 
-  static setupDefaultLayout(ws, data, hStyle, cStyle) {
+  static setupDefaultLayout(ws, data, hStyle, cStyle, filters) {
     const headers = ['NO', 'TANGGAL', 'NOPOL', 'JENIS KENDARAAN', 'KOMPONEN', 'KATEGORI', 'KM RECORD', 'DETAIL', 'CATATAN'];
-    ws.getRow(1).values = headers;
-    ws.getRow(1).eachCell((cell) => { cell.style = hStyle; });
+    
+    let currentRow = 1;
+    if (filters?.date_from || filters?.date_to) {
+      ws.mergeCells(`A${currentRow}:I${currentRow}`);
+      ws.getCell(`A${currentRow}`).value = `LAPORAN RIWAYAT PERAWATAN (${this.formatDate(filters.date_from)} s/d ${this.formatDate(filters.date_to)})`;
+      ws.getCell(`A${currentRow}`).style = { ...hStyle, font: { ...hStyle.font, size: 12 } };
+      currentRow++;
+    }
+
+    ws.getRow(currentRow).values = headers;
+    ws.getRow(currentRow).eachCell((cell) => { cell.style = hStyle; });
+    currentRow++;
 
     data.forEach((row, i) => {
       const detail = row.detail_komponen || {};
