@@ -141,6 +141,7 @@
       @updated="onKmUpdated" 
     />
     <AddComponentModal :isOpen="showAddComponent" :monitoringId="$route.params.id" @close="showAddComponent = false" @component-added="loadComponents" />
+    <EditComponentModal :isOpen="showEditComponent" :componentData="selectedComponent" @close="showEditComponent = false" @component-updated="loadComponents" />
     <AddCategoryModal :isOpen="showAddCategory" @close="showAddCategory = false" />
     
     <!-- Reset Component Modal -->
@@ -335,6 +336,7 @@
 import Sidebar from '@/components/Sidebar.vue'
 import AddCategoryModal from '@/components/AddCategoryModal.vue'
 import AddComponentModal from '@/components/AddComponentModal.vue'
+import EditComponentModal from '@/components/EditComponentModal.vue'
 import UpdateKilometerModal from '@/components/UpdateKilometerModal.vue'
 import componentService from '@/modules/monitoring/services/componentService'
 import { mapState, mapActions } from 'vuex'
@@ -342,7 +344,7 @@ import Swal from 'sweetalert2'
 
 export default {
   name: 'VehicleDetailView',
-  components: { Sidebar, AddCategoryModal, AddComponentModal, UpdateKilometerModal },
+  components: { Sidebar, AddCategoryModal, AddComponentModal, EditComponentModal, UpdateKilometerModal },
   data() {
     return {
       searchQuery: '',
@@ -350,6 +352,7 @@ export default {
       showUpdateKm: false,
       showAddComponent: false,
       showEditComponent: false,
+      selectedComponent: null,
       showAddCategory: false,
       showResetModal: false,
       showDetailModal: false,
