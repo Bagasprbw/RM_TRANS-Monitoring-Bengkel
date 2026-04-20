@@ -51,7 +51,7 @@
               <thead>
                 <tr>
                   <th>Plat Nomor</th>
-                  <th>Merk Truk</th>
+                  <th>Merk | Jenis</th>
                   <th>Total KM</th>
                   <th>Kondisi</th>
                   <th>Status</th>
@@ -83,7 +83,11 @@
                     </div>
                   </td>
                   <td>
-                    <span class="merk-chip">{{ getJenisKendaraan(item) }}</span>
+                    <div class="merk-jenis-wrap">
+                      <span class="merk-name">{{ item.armada?.merk?.nama_merk || '-' }}</span>
+                      <span class="sep">|</span>
+                      <span class="jenis-name">{{ item.armada?.jenis?.nama_jenis || '-' }}</span>
+                    </div>
                   </td>
                   <td>
                     <span class="km-text">{{ formatNumber(item.last_recorded_km) }} <span class="km-unit">km</span></span>
@@ -146,7 +150,10 @@ export default {
         list = list.filter(i => {
           const nopol = i.armada?.nopol || i.plat_nomor || ''
           const jenis = i.armada?.jenis?.nama_jenis || i.jenis_kendaraan || ''
-          return nopol.toLowerCase().includes(q) || jenis.toLowerCase().includes(q)
+          const merk = i.armada?.merk?.nama_merk || ''
+          return nopol.toLowerCase().includes(q) || 
+                 jenis.toLowerCase().includes(q) || 
+                 merk.toLowerCase().includes(q)
         })
       }
       
@@ -285,7 +292,29 @@ input:checked + .slider:before { transform: translateX(16px); }
 .nopol-text { font-weight: 700; color: #1e1d4c; letter-spacing: 0.3px; }
 .critical-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: #fee2e2; color: #991b1b; border-radius: 999px; font-size: 0.68rem; font-weight: 700; }
 
-.merk-chip { display: inline-flex; padding: 0.22rem 0.7rem; background: #f5f5fb; border: 1px solid #e8e8f0; border-radius: 6px; font-size: 0.78rem; font-weight: 500; color: #4b5563; }
+.merk-jenis-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.merk-name {
+  font-weight: 700;
+  color: #1e1d4c;
+  background: #f0f0fb;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.sep {
+  color: #d1d5db;
+}
+
+.jenis-name {
+  color: #6b7280;
+  font-weight: 500;
+}
 
 .km-text { font-weight: 600; color: #1e1d4c; }
 .km-unit { font-size: 0.75rem; font-weight: 400; color: #9ca3af; }

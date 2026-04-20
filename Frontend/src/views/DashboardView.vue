@@ -81,7 +81,7 @@
                       <div class="vehicle-dot" :class="r.dotClass"></div>
                       <div>
                         <span class="fw-semibold">{{ r.nopol }}</span>
-                        <div style="font-size: 0.7rem; color: #9ca3af;">{{ r.merk }}</div>
+                        <div style="font-size: 0.7rem; color: #9ca3af;">{{ r.merk }} | {{ r.jenis }}</div>
                       </div>
                     </div>
                   </td>

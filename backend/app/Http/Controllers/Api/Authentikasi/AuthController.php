@@ -53,4 +53,32 @@ class AuthController extends Controller
             'message' => 'Logout berhasil'
         ]);
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'username' => 'required|unique:users,username,' . $user->id,
+            'current_password' => 'nullable|required_with:password',
+            'password' => 'nullable|min:6|confirmed'
+        ]);
+
+        if ($request->filled('password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'message' => 'Password lama tidak sesuai'
+                ], 400);
+            }
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->username = $request->username;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui',
+            'user' => $user
+        ]);
+    }
 }

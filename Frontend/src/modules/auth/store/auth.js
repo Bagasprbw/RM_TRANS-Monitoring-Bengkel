@@ -60,6 +60,19 @@ const actions = {
     } finally {
       commit('LOGOUT')
     }
+  },
+
+  async updateProfile({ commit }, payload) {
+    try {
+      commit('SET_LOADING', true)
+      const res = await axios.post('/update-profile', payload)
+      commit('SET_USER', res.data.user)
+      return res.data
+    } catch (err) {
+      throw err
+    } finally {
+      commit('SET_LOADING', false)
+    }
   }
 }
 

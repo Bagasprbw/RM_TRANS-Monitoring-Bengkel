@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Authentikasi\AuthController;
 use App\Http\Controllers\Api\Armada\ArmadaController;
 use App\Http\Controllers\Api\Armada\JenisArmadaController;
+use App\Http\Controllers\Api\Armada\MerkArmadaController;
 use App\Http\Controllers\Api\KategoriKomponen\KategoriKomponenController;
 
 // Login
@@ -15,6 +16,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('armada', ArmadaController::class);
     // Jenis Armada
     Route::apiResource('jenis_armada', JenisArmadaController::class);
+    // Merk Armada
+    Route::apiResource('merk_armada', MerkArmadaController::class);
     // Categori Komponen (hanya Get all, create, delete)
     Route::get('kategori_komponen', [KategoriKomponenController::class, 'index']);
     Route::post('kategori_komponen', [KategoriKomponenController::class, 'store']);
@@ -35,6 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('komponen_armada/{id}/reset', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'reset']);
     Route::delete('komponen_armada/{id}', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'destroy']);
     Route::get('riwayat_perawatan', [\App\Http\Controllers\Api\KomponenArmada\RiwayatPerawatanController::class, 'index']);
+
+    // Profiling
+    Route::post('update-profile', [AuthController::class, 'updateProfile']);
 
     // Logout
     Route::post('logout', [AuthController::class, 'logout']);

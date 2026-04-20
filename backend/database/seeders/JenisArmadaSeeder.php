@@ -10,11 +10,11 @@ class JenisArmadaSeeder extends Seeder
     public function run(): void
     {
         $jenis = [
-            'Hino',
-            'Isuzu',
-            'Mitsubishi',
-            'Fighter',
-            'Center',
+            'Jenis-A',
+            'Jenis-B',
+            'Jenis-C',
+            'Jenis-D',
+            'Jenis-E',
         ];
 
         foreach ($jenis as $nama) {

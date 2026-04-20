@@ -11,7 +11,7 @@ class ArmadaController extends Controller
     // GET semua data
     public function index()
     {
-        $data = Armada::with(['jenis', 'monitoring'])->get();
+        $data = Armada::with(['merk', 'jenis', 'monitoring'])->get();
 
         return response()->json($data);
     }
@@ -21,15 +21,17 @@ class ArmadaController extends Controller
     {
         $request->validate([
             'nopol' => 'required|unique:armada,nopol',
+            'merk_armada_id' => 'required|exists:merk_armada,id',
             'jenis_armada_id' => 'required|exists:jenis_armada,id'
         ]);
 
         $armada = Armada::create([
             'nopol' => $request->nopol,
+            'merk_armada_id' => $request->merk_armada_id,
             'jenis_armada_id' => $request->jenis_armada_id
         ]);
 
-        $armada->load('jenis');
+        $armada->load(['merk', 'jenis']);
 
         return response()->json([
             'message' => 'Armada berhasil ditambahkan',
@@ -40,7 +42,7 @@ class ArmadaController extends Controller
     // GET detail
     public function show($id)
     {
-        $armada = Armada::with('jenis')->find($id);
+        $armada = Armada::with(['merk', 'jenis'])->find($id);
 
         if (!$armada) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
@@ -60,15 +62,17 @@ class ArmadaController extends Controller
 
         $request->validate([
             'nopol' => 'required|unique:armada,nopol,' . $id,
+            'merk_armada_id' => 'required|exists:merk_armada,id',
             'jenis_armada_id' => 'required|exists:jenis_armada,id'
         ]);
 
         $armada->update([
             'nopol' => $request->nopol,
+            'merk_armada_id' => $request->merk_armada_id,
             'jenis_armada_id' => $request->jenis_armada_id
         ]);
 
-        $armada->load('jenis');
+        $armada->load(['merk', 'jenis']);
 
         return response()->json([
             'message' => 'Armada berhasil diupdate',
