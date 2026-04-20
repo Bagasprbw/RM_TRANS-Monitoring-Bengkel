@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('monitoring_armada_aktif/{monitoring_id}/komponen', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'index']);
     Route::post('monitoring_armada_aktif/{monitoring_id}/komponen', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'store']);
     Route::post('komponen_armada/{id}/reset', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'reset']);
+    Route::put('komponen_armada/{id}', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'update']);
     Route::delete('komponen_armada/{id}', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'destroy']);
     Route::get('riwayat_perawatan', [\App\Http\Controllers\Api\KomponenArmada\RiwayatPerawatanController::class, 'index']);
 

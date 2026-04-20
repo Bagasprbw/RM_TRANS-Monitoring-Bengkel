@@ -182,6 +182,63 @@ class KomponenArmadaController extends Controller
         }
     }
 
+    public function update(Request $request, $id)
+    {
+        $komponen = KomponenArmada::findOrFail($id);
+        
+        $validator = Validator::make($request->all(), [
+            'kategori_komponen_id' => 'required|exists:category_componen,id',
+            'nama_komponen' => 'required|string|max:100',
+            'tipe_pelacakan' => 'required|in:km,date,days',
+            'target_km' => 'required_if:tipe_pelacakan,km|nullable|numeric',
+            'target_tanggal' => 'required_if:tipe_pelacakan,date|nullable|date',
+            'target_hari' => 'required_if:tipe_pelacakan,days|nullable|numeric',
+            'has_identity' => 'boolean',
+            'detail' => 'nullable|array'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $komponen->update([
+                'kategori_komponen_id' => $request->kategori_komponen_id,
+                'nama_komponen' => $request->nama_komponen,
+                'tipe_pelacakan' => $request->tipe_pelacakan,
+                'target_km' => $request->target_km,
+                'target_tanggal' => $request->target_tanggal,
+                'target_hari' => $request->target_hari,
+                'has_identity' => $request->has_identity ?? false,
+            ]);
+
+            // For now, if the identity fields change, just update the currently active detail record if it exists
+            if ($request->has_identity && $request->has('detail')) {
+                $latestDetail = DetailKomponenArmada::where('komponen_armada_id', $komponen->id)
+                    ->latest('id')
+                    ->first();
+                    
+                if ($latestDetail) {
+                    $latestDetail->update($request->detail);
+                } else {
+                    DetailKomponenArmada::create(array_merge($request->detail, [
+                        'komponen_armada_id' => $komponen->id
+                    ]));
+                }
+            } else if (!$request->has_identity) {
+                // If it is toggled off, we don't necessarily delete the history, but it won't be editable here anymore.
+            }
+
+            DB::commit();
+            return response()->json(['status' => 'success', 'data' => $komponen], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function destroy($id)
     {
         $komponen = KomponenArmada::findOrFail($id);
