@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            MerkArmadaSeeder::class,
             JenisArmadaSeeder::class,
             ArmadaSeeder::class,
             CategoryComponenSeeder::class,

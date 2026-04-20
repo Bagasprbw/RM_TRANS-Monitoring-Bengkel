@@ -13,7 +13,7 @@ class MonitoringArmadaAktifController extends Controller
 {
     public function index()
     {
-        $monitoring = MonitoringArmadaAktif::with(['armada.jenis'])->get();
+        $monitoring = MonitoringArmadaAktif::with(['armada.jenis', 'armada.merk'])->get();
         return response()->json([
             'status' => 'success',
             'data'   => $monitoring
@@ -22,7 +22,7 @@ class MonitoringArmadaAktifController extends Controller
 
     public function reminders()
     {
-        $monitoring = MonitoringArmadaAktif::with(['armada.jenis', 'komponen.kategori'])
+        $monitoring = MonitoringArmadaAktif::with(['armada.jenis', 'armada.merk', 'komponen.kategori'])
             ->where('status', 'aktif')
             ->get();
 
@@ -37,7 +37,8 @@ class MonitoringArmadaAktifController extends Controller
                         'id' => $komp->id,
                         'monitoring_id' => $mon->id,
                         'nopol' => $mon->armada->nopol ?? '-',
-                        'merk' => $mon->armada->jenis->nama_jenis ?? '-',
+                        'merk' => $mon->armada->merk->nama_merk ?? '-',
+                        'jenis' => $mon->armada->jenis->nama_jenis ?? '-',
                         'nama_komponen' => $komp->nama_komponen,
                         'kategori' => $komp->kategori->nama_kategori ?? '-',
                         'health' => $healthData['health'],
@@ -58,7 +59,7 @@ class MonitoringArmadaAktifController extends Controller
     public function availableArmada()
     {
         // Get all armadas that do NOT have active monitoring
-        $armadas = Armada::with('jenis')
+        $armadas = Armada::with(['jenis', 'merk'])
             ->whereDoesntHave('monitoring', function ($query) {
                 $query->where('status', 'aktif');
             })
@@ -113,7 +114,7 @@ class MonitoringArmadaAktifController extends Controller
 
     public function show($id)
     {
-        $monitoring = MonitoringArmadaAktif::with(['armada.jenis'])->find($id);
+        $monitoring = MonitoringArmadaAktif::with(['armada.jenis', 'armada.merk'])->find($id);
         if (!$monitoring) {
             return response()->json([
                 'status'  => 'error',
@@ -151,7 +152,7 @@ class MonitoringArmadaAktifController extends Controller
         $monitoring->status = $request->status;
         $monitoring->save();
 
-        $monitoring->load('armada.jenis');
+        $monitoring->load('armada.jenis', 'armada.merk');
 
         return response()->json([
             'status'  => 'success',

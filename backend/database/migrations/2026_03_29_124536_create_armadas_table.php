@@ -14,7 +14,12 @@ return new class extends Migration
         Schema::create('armada', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('nopol', 50)->unique();
-            $table->uuid('jenis_armada_id');
+            $table->string('merk_armada_id');
+            $table->string('jenis_armada_id');
+
+            $table->foreign('merk_armada_id')
+                ->references('id')->on('merk_armada')
+                ->cascadeOnDelete();
 
             $table->foreign('jenis_armada_id')
                 ->references('id')->on('jenis_armada')

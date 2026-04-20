@@ -14,7 +14,7 @@
           <select v-model="form.kendaraan_id">
             <option value="">-- Pilih Kendaraan --</option>
             <option v-for="k in availableArmadaList" :key="k.id" :value="k.id">
-              {{ k.nopol }} - {{ k.jenis?.nama_jenis || k.jenis_kendaraan }}
+              {{ k.nopol }} - {{ k.merk?.nama_merk || '-' }} | {{ k.jenis?.nama_jenis || '-' }}
             </option>
           </select>
           <p v-if="errors.kendaraan_id" class="err-msg">{{ errors.kendaraan_id }}</p>

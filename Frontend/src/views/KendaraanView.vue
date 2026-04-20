@@ -32,7 +32,7 @@
               <p class="stat-value">{{ armadaList.length }}</p>
             </div>
           </div>
-          <div class="stat-card" v-for="m in dynamicMerkList" :key="m.name">
+          <div class="stat-card" v-for="m in dynamicMerkList" :key="m.id">
             <div class="stat-icon-wrap" :style="{ background: m.bg, color: m.color }">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 17h14v-5H5v5zM5 12l2-7h10l2 7" />
@@ -42,7 +42,7 @@
             </div>
             <div>
               <p class="stat-label">{{ m.name }}</p>
-              <p class="stat-value">{{ getMerkCount(m.name) }}</p>
+              <p class="stat-value">{{ getMerkCount(m.id) }}</p>
             </div>
           </div>
         </div>
@@ -55,7 +55,7 @@
               <circle cx="11" cy="11" r="8" />
               <path d="M21 21l-4.35-4.35" />
             </svg>
-            <input v-model="searchQuery" type="text" placeholder="Cari nomor polisi atau jenis kendaraan..." />
+            <input v-model="searchQuery" type="text" placeholder="Cari nomor polisi, merk, atau jenis..." />
             <button v-if="searchQuery" class="clear-btn" @click="searchQuery = ''">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="13" height="13" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -65,8 +65,14 @@
           </div>
           <select v-model="selectedMerk" class="select-filter">
             <option value="">Semua Merk</option>
-            <option v-for="m in dynamicMerkOptions" :key="m" :value="m">{{ m }}</option>
+            <option v-for="m in merkArmadaList" :key="m.id" :value="m.id">{{ m.nama_merk }}</option>
           </select>
+          <button class="btn-outline" @click="showManageMaster = true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2">
+              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+            Kelola Merk & Jenis
+          </button>
         </div>
 
         <!-- Table -->
@@ -89,7 +95,7 @@
                 <tr>
                   <th>#</th>
                   <th>Nomor Polisi</th>
-                  <th>Merk Truk</th>
+                  <th>Merk | Jenis</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
@@ -119,9 +125,13 @@
                     </div>
                   </td>
                   <td>
-                    <span class="badge" :style="getMerkBadgeStyle(k.jenis?.nama_jenis)">
-                      {{ k.jenis?.nama_jenis || '-' }}
-                    </span>
+                    <div class="type-badge-wrap">
+                      <span class="badge badge-merk" :style="getMerkBadgeStyle(k.merk?.id)">
+                        {{ k.merk?.nama_merk || '-' }}
+                      </span>
+                      <span class="type-connector">|</span>
+                      <span class="type-text">{{ k.jenis?.nama_jenis || '-' }}</span>
+                    </div>
                   </td>
                   <td>
                     <span 
@@ -166,6 +176,7 @@
     <AddKendaraanModal :is-open="showAdd" @close="showAdd = false" @kendaraan-added="addKendaraan" />
     <EditKendaraanModal :is-open="showEdit" :kendaraan="selectedKendaraan" @close="closeEdit"
       @kendaraan-updated="updateKendaraan" />
+    <ManageMasterModal :is-open="showManageMaster" @close="showManageMaster = false" />
   </div>
 </template>
 
@@ -174,37 +185,36 @@ import { mapState, mapActions, mapGetters } from 'vuex'
 import Sidebar from '@/components/Sidebar.vue'
 import AddKendaraanModal from '@/components/AddKendaraanModal.vue'
 import EditKendaraanModal from '@/components/EditKendaraanModal.vue'
+import ManageMasterModal from '@/components/ManageMasterModal.vue'
 
 export default {
   name: 'KendaraanView',
-  components: { Sidebar, AddKendaraanModal, EditKendaraanModal },
+  components: { Sidebar, AddKendaraanModal, EditKendaraanModal, ManageMasterModal },
   data() {
     return {
       searchQuery: '',
       selectedMerk: '',
       showAdd: false,
       showEdit: false,
+      showManageMaster: false,
       selectedKendaraan: null
     }
   },
   computed: {
     ...mapState('armada', ['loading']),
-    ...mapGetters('armada', ['armadaList', 'jenisArmadaList']),
-
-    dynamicMerkOptions() {
-      return this.jenisArmadaList.map(j => j.nama_jenis)
-    },
+    ...mapGetters('armada', ['armadaList', 'jenisArmadaList', 'merkArmadaList']),
 
     dynamicMerkList() {
       const colors = [
+        { bg: '#ede9fe', color: '#6d28d9' },  // Purple
         { bg: '#dbeafe', color: '#1d4ed8' }, // Blue
         { bg: '#fee2e2', color: '#991b1b' }, // Red
         { bg: '#fef9c3', color: '#854d0e' }, // Yellow
         { bg: '#dcfce7', color: '#15803d' }, // Green
-        { bg: '#ede9fe', color: '#6d28d9' }  // Purple
       ]
-      return this.jenisArmadaList.map((j, index) => ({
-        name: j.nama_jenis,
+      return this.merkArmadaList.map((m, index) => ({
+        id: m.id,
+        name: m.nama_merk,
         ...colors[index % colors.length]
       }))
     },
@@ -215,11 +225,12 @@ export default {
         const q = this.searchQuery.toLowerCase()
         list = list.filter(k =>
           k.nopol.toLowerCase().includes(q) ||
+          (k.merk?.nama_merk || '').toLowerCase().includes(q) ||
           (k.jenis?.nama_jenis || '').toLowerCase().includes(q)
         )
       }
       if (this.selectedMerk) {
-        list = list.filter(k => k.jenis?.nama_jenis === this.selectedMerk)
+        list = list.filter(k => k.merk_armada_id === this.selectedMerk)
       }
       return list
     }
@@ -231,6 +242,7 @@ export default {
     ...mapActions('armada', [
       'fetchArmada',
       'fetchJenisArmada',
+      'fetchMerkArmada',
       'createArmada',
       'updateArmada',
       'deleteArmada'
@@ -239,7 +251,8 @@ export default {
     async loadArmadaData() {
       await Promise.all([
         this.fetchArmada(),
-        this.fetchJenisArmada()
+        this.fetchJenisArmada(),
+        this.fetchMerkArmada()
       ])
     },
 
@@ -247,8 +260,8 @@ export default {
       await this.loadArmadaData()
     },
 
-    getMerkCount(merk) {
-      return this.armadaList.filter(k => k.jenis?.nama_jenis === merk).length
+    getMerkCount(merkId) {
+      return this.armadaList.filter(k => k.merk_armada_id === merkId).length
     },
 
     async addKendaraan(data) {
@@ -262,8 +275,8 @@ export default {
       this.selectedKendaraan = {
         id: k.id,
         nopol: k.nopol,
-        jenis_armada_id: k.jenis_armada_id,
-        jenis_kendaraan: k.jenis?.nama_jenis
+        merk_armada_id: k.merk_armada_id,
+        jenis_armada_id: k.jenis_armada_id
       }
       this.showEdit = true
     },
@@ -278,6 +291,7 @@ export default {
         id: this.selectedKendaraan.id,
         data: {
           nopol: data.nopol,
+          merk_armada_id: data.merk_armada_id,
           jenis_armada_id: data.jenis_armada_id
         }
       })
@@ -291,8 +305,8 @@ export default {
       await this.deleteArmada(id)
     },
 
-    getMerkBadgeStyle(jenis) {
-      const merkData = this.dynamicMerkList.find(m => m.name === jenis)
+    getMerkBadgeStyle(merkId) {
+      const merkData = this.dynamicMerkList.find(m => m.id === merkId)
       if (merkData) {
         return { backgroundColor: merkData.bg, color: merkData.color }
       }
@@ -601,6 +615,49 @@ export default {
   font-weight: 700;
   color: #1e1d4c;
   letter-spacing: 0.3px;
+}
+
+.type-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-merk {
+  min-width: 60px;
+  justify-content: center;
+}
+
+.type-connector {
+  color: #d1d5db;
+  font-weight: 300;
+}
+
+.type-text {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.btn-outline {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.65rem 1rem;
+  background: #fff;
+  border: 1.5px solid #e8e8f0;
+  border-radius: 10px;
+  color: #3E3D90;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-outline:hover {
+  background: #f0f0fb;
+  border-color: #3E3D90;
 }
 
 /* ===== EMPTY ===== */

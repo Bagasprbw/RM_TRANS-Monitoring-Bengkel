@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api\Armada;
 
 use App\Http\Controllers\Controller;
-use App\Models\JenisArmada;
+use App\Models\MerkArmada;
 use Illuminate\Http\Request;
 
-class JenisArmadaController extends Controller
+class MerkArmadaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $data = JenisArmada::all();
+        $data = MerkArmada::all();
         return response()->json($data);
     }
 
@@ -23,16 +23,16 @@ class JenisArmadaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_jenis' => 'required|unique:jenis_armada,nama_jenis'
+            'nama_merk' => 'required|unique:merk_armada,nama_merk'
         ]);
 
-        $jenis = JenisArmada::create([
-            'nama_jenis' => $request->nama_jenis
+        $merk = MerkArmada::create([
+            'nama_merk' => $request->nama_merk
         ]);
 
         return response()->json([
-            'message' => 'Jenis armada berhasil ditambahkan',
-            'data' => $jenis
+            'message' => 'Merk armada berhasil ditambahkan',
+            'data' => $merk
         ], 201);
     }
 
@@ -41,13 +41,13 @@ class JenisArmadaController extends Controller
      */
     public function show($id)
     {
-        $jenis = JenisArmada::find($id);
+        $merk = MerkArmada::find($id);
 
-        if (!$jenis) {
+        if (!$merk) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
-        return response()->json($jenis);
+        return response()->json($merk);
     }
 
     /**
@@ -55,23 +55,23 @@ class JenisArmadaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $jenis = JenisArmada::find($id);
+        $merk = MerkArmada::find($id);
 
-        if (!$jenis) {
+        if (!$merk) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
         $request->validate([
-            'nama_jenis' => 'required|unique:jenis_armada,nama_jenis,' . $id
+            'nama_merk' => 'required|unique:merk_armada,nama_merk,' . $id
         ]);
 
-        $jenis->update([
-            'nama_jenis' => $request->nama_jenis
+        $merk->update([
+            'nama_merk' => $request->nama_merk
         ]);
 
         return response()->json([
-            'message' => 'Jenis armada berhasil diupdate',
-            'data' => $jenis
+            'message' => 'Merk armada berhasil diupdate',
+            'data' => $merk
         ]);
     }
 
@@ -80,22 +80,22 @@ class JenisArmadaController extends Controller
      */
     public function destroy($id)
     {
-        $jenis = JenisArmada::withCount('armada')->find($id);
+        $merk = MerkArmada::withCount('armada')->find($id);
 
-        if (!$jenis) {
+        if (!$merk) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
-        if ($jenis->armada_count > 0) {
+        if ($merk->armada_count > 0) {
             return response()->json([
-                'message' => 'Jenis tidak dapat dihapus karena sudah digunakan oleh ' . $jenis->armada_count . ' armada'
+                'message' => 'Merk tidak dapat dihapus karena sudah digunakan oleh ' . $merk->armada_count . ' armada'
             ], 422);
         }
 
-        $jenis->delete();
+        $merk->delete();
 
         return response()->json([
-            'message' => 'Jenis armada berhasil dihapus'
+            'message' => 'Merk armada berhasil dihapus'
         ]);
     }
 }

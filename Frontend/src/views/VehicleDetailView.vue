@@ -14,7 +14,7 @@
               <h1 class="page-title">{{ vehicle.plat_nomor }}</h1>
               <span class="status-badge">Aktif</span>
             </div>
-            <p class="page-sub">{{ vehicle.jenis_kendaraan }}</p>
+            <p class="page-sub">{{ vehicle.merk }} | {{ vehicle.jenis_kendaraan }}</p>
           </div>
         </div>
 
@@ -391,6 +391,7 @@ export default {
         id: this.currentMonitoring.id,
         armada_id: this.currentMonitoring.armada_id,
         plat_nomor: this.currentMonitoring.armada?.nopol || 'Unknown',
+        merk: this.currentMonitoring.armada?.merk?.nama_merk || '-',
         jenis_kendaraan: this.currentMonitoring.armada?.jenis?.nama_jenis || 'Unknown',
         total_km: this.currentMonitoring.last_recorded_km || 0
       }

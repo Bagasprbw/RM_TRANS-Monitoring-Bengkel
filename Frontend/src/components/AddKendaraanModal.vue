@@ -24,12 +24,26 @@
         <form @submit.prevent="handleSubmit" class="modal-body">
           <div class="form-group">
             <label>Merk Truk <span class="req">*</span></label>
-            <select v-model="form.jenis_armada_id" required>
-              <option value="">— Pilih Merk —</option>
-              <option v-for="merk in jenisArmadaList" :key="merk.id" :value="merk.id">
-                {{ merk.nama_jenis }}
-              </option>
-            </select>
+            <div class="input-with-action">
+              <select v-model="form.merk_armada_id" required>
+                <option value="">— Pilih Merk —</option>
+                <option v-for="m in merkArmadaList" :key="m.id" :value="m.id">
+                  {{ m.nama_merk }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Jenis Truk <span class="req">*</span></label>
+            <div class="input-with-action">
+              <select v-model="form.jenis_armada_id" required>
+                <option value="">— Pilih Jenis —</option>
+                <option v-for="j in jenisArmadaList" :key="j.id" :value="j.id">
+                  {{ j.nama_jenis }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <div class="form-group">
@@ -39,10 +53,14 @@
           </div>
 
           <transition name="fade">
-            <div v-if="form.jenis_armada_id && form.nopol" class="preview-box">
+            <div v-if="form.merk_armada_id && form.jenis_armada_id && form.nopol" class="preview-box">
               <div class="preview-row">
                 <span class="preview-label">Merk</span>
-                <span class="preview-val">{{ getJenisArmadaName(form.jenis_armada_id) }}</span>
+                <span class="preview-val">{{ getMerkName(form.merk_armada_id) }}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Jenis</span>
+                <span class="preview-val">{{ getJenisName(form.jenis_armada_id) }}</span>
               </div>
               <div class="preview-row">
                 <span class="preview-label">Nopol</span>
@@ -75,16 +93,18 @@ export default {
   data() {
     return {
       form: { 
+        merk_armada_id: '',
         jenis_armada_id: '', 
         nopol: '' 
       }
     }
   },
   computed: {
-    ...mapGetters('armada', ['armadaList', 'jenisArmadaList']),
+    ...mapGetters('armada', ['armadaList', 'jenisArmadaList', 'merkArmadaList']),
     
     canSubmit() {
-      return this.form.jenis_armada_id && 
+      return this.form.merk_armada_id && 
+             this.form.jenis_armada_id && 
              this.form.nopol.trim() &&
              /^[A-Z]{1,2}\s\d{1,4}\s[A-Z]{1,3}$/i.test(this.form.nopol.trim())
     }
@@ -92,15 +112,21 @@ export default {
   watch: {
     isOpen(v) { 
       if (v) {
-        this.form = { jenis_armada_id: '', nopol: '' }
+        this.form = { merk_armada_id: '', jenis_armada_id: '', nopol: '' }
         this.fetchJenisArmada()
+        this.fetchMerkArmada()
       }
     }
   },
   methods: {
-    ...mapActions('armada', ['fetchJenisArmada']),
+    ...mapActions('armada', ['fetchJenisArmada', 'fetchMerkArmada']),
 
-    getJenisArmadaName(id) {
+    getMerkName(id) {
+      const found = this.merkArmadaList.find(item => item.id === id)
+      return found ? found.nama_merk : ''
+    },
+
+    getJenisName(id) {
       const found = this.jenisArmadaList.find(item => item.id === id)
       return found ? found.nama_jenis : ''
     },
@@ -110,6 +136,7 @@ export default {
       
       this.$emit('kendaraan-added', {
         nopol: this.form.nopol.trim().toUpperCase(),
+        merk_armada_id: this.form.merk_armada_id,
         jenis_armada_id: this.form.jenis_armada_id
       })
     }

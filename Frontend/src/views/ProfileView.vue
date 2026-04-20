@@ -25,11 +25,16 @@
           </div>
           
           <div class="profile-form">
-            <h4 class="form-title">Ganti Kredensial (Frontend Only)</h4>
+            <h4 class="form-title">Ganti Kredensial</h4>
             
             <div class="form-group">
               <label>Username Anda</label>
               <input type="text" v-model="form.username" placeholder="Masukkan username baru" />
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+              <label>Password Lama</label>
+              <input type="password" v-model="form.current_password" placeholder="Masukkan password lama (jika ingin ganti password)" />
             </div>
 
             <div class="grid-form">
@@ -58,6 +63,7 @@
 <script>
 import Sidebar from '@/components/Sidebar.vue'
 import Swal from 'sweetalert2'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'ProfileView',
@@ -66,6 +72,7 @@ export default {
     return {
       form: {
         username: '',
+        current_password: '',
         password: '',
         password_confirmation: ''
       }
@@ -84,19 +91,42 @@ export default {
     }
   },
   methods: {
-    saveProfile() {
+    ...mapActions('auth', ['updateProfile']),
+    async saveProfile() {
       if(this.form.password && this.form.password !== this.form.password_confirmation) {
           Swal.fire('Gagal', 'Konfirmasi password tidak cocok', 'error');
           return;
       }
       
-      // Karena murni frontend, kita munculkan info
-      Swal.fire({
-          title: 'Fitur Belum Tersedia',
-          text: 'Tampilan profil sudah siap, namun fitur simpan membutuhkan API Backend yang belum ada.',
-          icon: 'info',
-          confirmButtonColor: '#3E3D90'
-      });
+      try {
+        const payload = { username: this.form.username };
+        if (this.form.password) {
+            payload.current_password = this.form.current_password;
+            payload.password = this.form.password;
+            payload.password_confirmation = this.form.password_confirmation;
+        }
+
+        const res = await this.updateProfile(payload);
+        
+        Swal.fire({
+            title: 'Berhasil',
+            text: res.message || 'Profil berhasil diperbarui.',
+            icon: 'success',
+            confirmButtonColor: '#3E3D90'
+        });
+
+        // Clear password fields
+        this.form.current_password = '';
+        this.form.password = '';
+        this.form.password_confirmation = '';
+        
+      } catch (err) {
+        let msg = err.response?.data?.message || 'Gagal memperbarui profil.';
+        if (err.response?.data?.errors) {
+            msg = Object.values(err.response.data.errors).flat().join('\n');
+        }
+        Swal.fire('Error', msg, 'error');
+      }
     }
   }
 }

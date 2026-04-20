@@ -1,11 +1,13 @@
 import { armadaApi } from '../api/armadaApi'
 import { jenisArmadaApi } from '../api/jenisArmadaApi'
+import { merkArmadaApi } from '../api/merkArmadaApi'
 import Swal from 'sweetalert2'
 
 // State
 const state = {
   armadaList: [],
   jenisArmadaList: [],
+  merkArmadaList: [],
   loading: false,
   currentArmada: null
 }
@@ -14,6 +16,7 @@ const state = {
 const getters = {
   armadaList: (state) => state.armadaList,
   jenisArmadaList: (state) => state.jenisArmadaList,
+  merkArmadaList: (state) => state.merkArmadaList,
   loading: (state) => state.loading,
   currentArmada: (state) => state.currentArmada
 }
@@ -25,6 +28,21 @@ const mutations = {
   },
   SET_JENIS_ARMADA_LIST(state, data) {
     state.jenisArmadaList = data
+  },
+  SET_MERK_ARMADA_LIST(state, data) {
+    state.merkArmadaList = data
+  },
+  ADD_JENIS_ARMADA(state, data) {
+    state.jenisArmadaList.push(data)
+  },
+  REMOVE_JENIS_ARMADA(state, id) {
+    state.jenisArmadaList = state.jenisArmadaList.filter(item => item.id !== id)
+  },
+  ADD_MERK_ARMADA(state, data) {
+    state.merkArmadaList.push(data)
+  },
+  REMOVE_MERK_ARMADA(state, id) {
+    state.merkArmadaList = state.merkArmadaList.filter(item => item.id !== id)
   },
   ADD_ARMADA(state, data) {
     state.armadaList.unshift(data)
@@ -57,6 +75,110 @@ const actions = {
     } catch (error) {
       console.error('Error fetching jenis armada:', error)
       return { success: false, error: error.message }
+    }
+  },
+
+  // Fetch all merk armada
+  async fetchMerkArmada({ commit }) {
+    try {
+      const response = await merkArmadaApi.getAll()
+      commit('SET_MERK_ARMADA_LIST', response.data)
+      return { success: true, data: response.data }
+    } catch (error) {
+      console.error('Error fetching merk armada:', error)
+      return { success: false, error: error.message }
+    }
+  },
+
+  // Create Jenis Armada
+  async createJenisArmada({ commit }, payload) {
+    try {
+      const response = await jenisArmadaApi.create(payload)
+      commit('ADD_JENIS_ARMADA', response.data.data)
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Jenis armada berhasil ditambahkan',
+        timer: 1500,
+        showConfirmButton: false
+      })
+      return { success: true, data: response.data.data }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: error.response?.data?.message || 'Gagal menambahkan jenis armada'
+      })
+      return { success: false }
+    }
+  },
+
+  // Delete Jenis Armada
+  async deleteJenisArmada({ commit }, id) {
+    try {
+      await jenisArmadaApi.delete(id)
+      commit('REMOVE_JENIS_ARMADA', id)
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Jenis armada berhasil dihapus',
+        timer: 1500,
+        showConfirmButton: false
+      })
+      return { success: true }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: error.response?.data?.message || 'Gagal menghapus jenis armada. Mungkin sedang digunakan oleh armada.'
+      })
+      return { success: false }
+    }
+  },
+
+  // Create Merk Armada
+  async createMerkArmada({ commit }, payload) {
+    try {
+      const response = await merkArmadaApi.create(payload)
+      commit('ADD_MERK_ARMADA', response.data.data)
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Merk armada berhasil ditambahkan',
+        timer: 1500,
+        showConfirmButton: false
+      })
+      return { success: true, data: response.data.data }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: error.response?.data?.message || 'Gagal menambahkan merk armada'
+      })
+      return { success: false }
+    }
+  },
+
+  // Delete Merk Armada
+  async deleteMerkArmada({ commit }, id) {
+    try {
+      await merkArmadaApi.delete(id)
+      commit('REMOVE_MERK_ARMADA', id)
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Merk armada berhasil dihapus',
+        timer: 1500,
+        showConfirmButton: false
+      })
+      return { success: true }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: error.response?.data?.message || 'Gagal menghapus merk armada. Mungkin sedang digunakan oleh armada.'
+      })
+      return { success: false }
     }
   },
 
