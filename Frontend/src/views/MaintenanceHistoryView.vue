@@ -131,7 +131,7 @@
                   <td>
                     <div class="vehicle-cell">
                       <span class="nopol-text">{{ row.komponen?.monitoring?.armada?.nopol || '-' }}</span>
-                      <span class="vehicle-type">{{ row.komponen?.monitoring?.armada?.jenis?.nama_jenis || '-' }}</span>
+                      <span class="vehicle-type">{{ row.komponen?.monitoring?.armada?.merk?.nama_merk || '-' }}({{ row.komponen?.monitoring?.armada?.jenis?.nama_jenis || '-' }})</span>
                     </div>
                   </td>
                   <td>

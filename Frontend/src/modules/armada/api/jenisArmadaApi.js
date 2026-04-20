@@ -9,5 +9,15 @@ export const jenisArmadaApi = {
   // GET detail jenis_armada by id
   getById(id) {
     return axios.get(`/jenis_armada/${id}`)
+  },
+
+  // POST create jenis_armada
+  create(data) {
+    return axios.post('/jenis_armada', data)
+  },
+
+  // DELETE jenis_armada
+  delete(id) {
+    return axios.delete(`/jenis_armada/${id}`)
   }
 }

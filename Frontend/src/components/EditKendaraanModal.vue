@@ -30,10 +30,20 @@
           
           <div class="form-group">
             <label>Merk Truk <span class="req">*</span></label>
-            <select v-model="form.jenis_armada_id" required>
+            <select v-model="form.merk_armada_id" required>
               <option value="" disabled>— Pilih Merk —</option>
-              <option v-for="merk in jenisArmadaList" :key="merk.id" :value="merk.id">
-                {{ merk.nama_jenis }}
+              <option v-for="merk in merkArmadaList" :key="merk.id" :value="merk.id">
+                {{ merk.nama_merk }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Jenis Truk <span class="req">*</span></label>
+            <select v-model="form.jenis_armada_id" required>
+              <option value="" disabled>— Pilih Jenis —</option>
+              <option v-for="j in jenisArmadaList" :key="j.id" :value="j.id">
+                {{ j.nama_jenis }}
               </option>
             </select>
           </div>
@@ -64,18 +74,20 @@ export default {
     return {
       form: { 
         nopol: '', 
+        merk_armada_id: '',
         jenis_armada_id: '' 
       }
     }
   },
   computed: {
-    ...mapGetters('armada', ['jenisArmadaList'])
+    ...mapGetters('armada', ['jenisArmadaList', 'merkArmadaList'])
   },
   watch: {
     kendaraan: {
       handler(v) {
         if (v) {
           this.form.nopol = v.nopol || ''
+          this.form.merk_armada_id = v.merk_armada_id || ''
           this.form.jenis_armada_id = v.jenis_armada_id || ''
         }
       },
@@ -85,17 +97,19 @@ export default {
     isOpen(v) {
       if (v) {
         this.fetchJenisArmada()
+        this.fetchMerkArmada()
       }
     }
   },
   methods: {
-    ...mapActions('armada', ['fetchJenisArmada']),
+    ...mapActions('armada', ['fetchJenisArmada', 'fetchMerkArmada']),
     
     handleSubmit() {
-      if (!this.form.nopol || !this.form.jenis_armada_id) return
+      if (!this.form.nopol || !this.form.merk_armada_id || !this.form.jenis_armada_id) return
       
       this.$emit('kendaraan-updated', {
         nopol: this.form.nopol.trim().toUpperCase(),
+        merk_armada_id: this.form.merk_armada_id,
         jenis_armada_id: this.form.jenis_armada_id
       })
     }

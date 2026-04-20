@@ -22,8 +22,14 @@ class Armada extends Model
     protected $fillable = [
         'id',
         'nopol',
+        'merk_armada_id',
         'jenis_armada_id'
     ];
+
+    public function merk()
+    {
+        return $this->belongsTo(MerkArmada::class, 'merk_armada_id');
+    }
 
     public function jenis()
     {

@@ -13,6 +13,7 @@ class RiwayatPerawatanController extends Controller
         $query = RiwayatPerawatanKomponen::with([
             'komponen.kategori',
             'komponen.monitoring.armada.jenis',
+            'komponen.monitoring.armada.merk',
             'detailKomponen'
         ]);
 
