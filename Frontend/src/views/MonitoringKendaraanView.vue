@@ -128,7 +128,7 @@
 <script>
 import Sidebar from '@/components/Sidebar.vue'
 import AddVehicleToMonitoringModal from '@/components/AddVehicleToMonitoringModal.vue'
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 import Swal from 'sweetalert2'
 
 export default {
@@ -141,7 +141,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('monitoring', ['monitoringList', 'loading']),
+    ...mapState('monitoring', ['monitoringList', 'loading', 'reminders']),
     filteredList() {
       if (!this.monitoringList) return []
       let list = this.monitoringList
@@ -167,9 +167,10 @@ export default {
   },
   mounted() {
     this.fetchMonitoring()
+    this.fetchReminders()
   },
   methods: {
-    ...mapActions('monitoring', ['fetchMonitoring', 'deleteMonitoring', 'updateStatus']),
+    ...mapActions('monitoring', ['fetchMonitoring', 'deleteMonitoring', 'updateStatus', 'fetchReminders']),
     async handleVehicleAdded() { 
       this.showAdd = false
     },
@@ -229,8 +230,8 @@ export default {
       return item.armada?.jenis?.nama_jenis || item.jenis_kendaraan || 'Unknown'
     },
     getCriticalCount(item) {
-      // Logic for critical count could be implemented here
-      return item.critical || 0
+      // Hitung jumlah komponen kritis dari reminders Vuex berdasarkan monitoring_id
+      return this.reminders.filter(r => r.monitoring_id === item.id).length
     }
   }
 }

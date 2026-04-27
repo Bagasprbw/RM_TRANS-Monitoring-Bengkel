@@ -684,10 +684,28 @@ input:focus, textarea:focus { border-color: #3E3D90; }
 .modal-fade-enter, .modal-fade-leave-to { opacity: 0; }
 
 @media (max-width: 768px) {
-  .topbar { padding: 0 1rem; height: auto; padding-top: 1rem; padding-bottom: 1rem; flex-direction: column; align-items: flex-start; }
+  .topbar { padding: 0 1rem; height: auto; padding-top: 0.85rem; padding-bottom: 0.85rem; padding-left: 4rem; flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .topbar-left { width: 100%; }
   .km-card { width: 100%; box-sizing: border-box; }
   .content-body { padding: 1rem; }
-  .section-actions { width: 100%; justify-content: space-between; }
-  .filter-tabs { max-width: 100%; }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .section-actions { width: 100%; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .filter-tabs { max-width: 100%; width: 100%; overflow-x: auto; }
+  .section-actions .btn-secondary,
+  .section-actions .btn-primary { width: 100%; justify-content: center; }
+  .comp-actions { gap: 3px; }
+  .reset-btn { padding: 0.35rem 0.6rem; font-size: 0.7rem; }
+  .component-item { gap: 0.7rem; padding: 0.9rem 1rem; }
+  .comp-name { font-size: 0.8rem; }
+  .search-row { padding: 0.75rem 1rem; }
+  .search-wrap { max-width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .topbar { padding: 0.75rem 0.75rem 0.75rem 3.5rem; }
+  .comp-icon { width: 32px; height: 32px; border-radius: 8px; }
+  .icon-btn { width: 28px; height: 28px; }
+  .comp-name-row { gap: 5px; }
+  .comp-stats { font-size: 0.7rem; }
 }
 </style>

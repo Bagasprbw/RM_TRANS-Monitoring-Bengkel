@@ -12,13 +12,6 @@
 
     <!-- Sidebar -->
     <aside class="sidebar" :class="{ 'sidebar-open': isOpen }">
-      <!-- Close button (mobile) -->
-      <button class="sidebar-close-btn" @click="isOpen = false" aria-label="Tutup menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      </button>
 
       <!-- Logo -->
       <div class="sidebar-logo">
@@ -33,7 +26,7 @@
           @click.native="isOpen = false">
           <span class="nav-icon" v-html="item.icon"></span>
           <span class="nav-label">{{ item.label }}</span>
-          <span v-if="item.badge" class="nav-badge"></span>
+          <span v-if="item.badge && hasReminders" class="nav-badge"></span>
         </router-link>
       </nav>
 
@@ -99,6 +92,9 @@ export default {
     userInitial() {
       if (!this.user || !this.user.name) return '?'
       return this.user.name.charAt(0).toUpperCase()
+    },
+    hasReminders() {
+      return this.$store.state.monitoring.reminders.length > 0
     }
   },
   methods: {
@@ -197,26 +193,6 @@ export default {
   backdrop-filter: blur(2px);
 }
 
-/* ===== CLOSE BUTTON (mobile only) ===== */
-.sidebar-close-btn {
-  display: none;
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #f5f5fb;
-  border: none;
-  border-radius: 8px;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: 6px;
-  align-items: center;
-  transition: all 0.15s;
-}
-
-.sidebar-close-btn:hover {
-  background: #f0f0f0;
-  color: #374151;
-}
 
 .sidebar {
   position: sticky;
@@ -403,9 +379,6 @@ export default {
     display: block;
   }
 
-  .sidebar-close-btn {
-    display: flex;
-  }
 
   .sidebar {
     position: fixed;

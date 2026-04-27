@@ -503,4 +503,28 @@ select:focus, input:focus { border-color: #3E3D90; box-shadow: 0 0 0 3px rgba(62
 @media (max-width: 1024px) {
   .history-detail-grid { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0.85rem 1rem 0.85rem 4rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .page-title { font-size: 1rem; }
+  .content-body { padding: 1rem; gap: 1rem; }
+  .filter-card { padding: 1rem; }
+  .filter-row { gap: 0.75rem; }
+  .filter-group { min-width: 100%; }
+  .search-group { min-width: 100%; }
+  .filter-actions { flex-wrap: wrap; width: 100%; }
+  .filter-actions button { flex: 1; justify-content: center; }
+  .table-header { flex-direction: column; align-items: flex-start; }
+  .table-header-right { flex-wrap: wrap; gap: 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .topbar { padding: 0.75rem 0.75rem 0.75rem 3.5rem; }
+  .page-title { font-size: 0.9rem; }
+  .page-sub { font-size: 0.7rem; }
+}
 </style>

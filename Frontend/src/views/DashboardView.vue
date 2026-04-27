@@ -469,7 +469,9 @@ body { font-family: 'Poppins', sans-serif; }
 
 @media (max-width: 768px) {
   .topbar {
-    padding: 1rem 1rem 1rem 4rem; /* ruang untuk hamburger */
+    padding: 0.85rem 1rem 0.85rem 4rem; /* ruang untuk hamburger */
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
   .page-title { font-size: 1rem; }
   .content-body { padding: 1rem; gap: 1rem; }
