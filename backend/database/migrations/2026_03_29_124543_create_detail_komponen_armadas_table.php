@@ -15,7 +15,7 @@ return new class extends Migration
             // KHUSUS BAN (Sheet 6)
             $table->string('nomor_seri', 50)->nullable();               // khususu NO SERI ban dan accu
             $table->string('nomor_stamp', 50)->nullable();              // NO STAMP ban
-            $table->enum('jenis_ban', ['ORI', 'VULK'])->nullable();     // ORI / VULK
+            $table->enum('jenis_ban', ['ORI', 'VULK PEMBELIAN, 'VULK JASA'])->nullable();     // ORI / VULK
             $table->string('ukuran', 50)->nullable();                   // Ukuran ban
             $table->string('merk_tipe', 100)->nullable();               // Merk / Type ban
             $table->string('pemasok', 100)->nullable();                 // Supplier
