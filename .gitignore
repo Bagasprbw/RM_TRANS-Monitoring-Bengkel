@@ -1,0 +1,9 @@
+# File environment Docker (berisi password, jangan di-push!)
+.env
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
