@@ -233,6 +233,16 @@
                             <label>KM Pasang Baru</label>
                             <input v-model.number="resetForm.new_detail.km_pemasangan" type="number" />
                         </div>
+
+                        <!-- Status Ban Bekas: apa yang terjadi pada ban LAMA yang dilepas -->
+                        <div v-if="resettingComp?.kategori?.nama_kategori.toLowerCase().includes('ban')" class="form-group" style="margin-top: 10px;">
+                            <label>Status Ban Bekas <span style="color:#94a3b8;font-weight:400;font-size:0.7rem;">(Ban yang dilepas)</span></label>
+                            <select v-model="resetForm.status_ban_bekas">
+                                <option :value="null">-- Pilih Status --</option>
+                                <option value="VULK">VULK (Di-Vulkanisir)</option>
+                                <option value="JUAL">JUAL (Dijual)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -364,6 +374,7 @@ export default {
           catatan: '',
           jumlah_liter: null,
           tanggal_pelepasan: '',
+          status_ban_bekas: null,
           new_detail: {
               nomor_seri: '',
               nomor_stamp: '',
@@ -466,6 +477,7 @@ export default {
             catatan: '',
             jumlah_liter: null,
             tanggal_pelepasan: today,
+            status_ban_bekas: null,
             new_detail: { 
                 nomor_seri: '', 
                 nomor_stamp: '',
@@ -486,12 +498,17 @@ export default {
             const payload = {
                 catatan: this.resetForm.catatan,
                 jumlah_liter: this.resetForm.jumlah_liter,
-                tanggal_pelepasan: this.resetForm.tanggal_pelepasan
+                tanggal_pelepasan: this.resetForm.tanggal_pelepasan,
+                status_ban_bekas: this.resetForm.status_ban_bekas || null
             };
             
-            // Only send new_detail if user typed a serial number
-            if (this.resetForm.new_detail.nomor_seri) {
-                payload.new_detail = { ...this.resetForm.new_detail };
+            // Kirim new_detail jika ada field bermakna yang diisi (tidak harus nomor_seri)
+            const nd = this.resetForm.new_detail;
+            const hasNewDetail = nd.nomor_seri || nd.nomor_stamp || nd.merk_tipe ||
+                                  nd.pemasok || nd.ukuran || (nd.harga > 0);
+
+            if (hasNewDetail) {
+                payload.new_detail = { ...nd };
             }
 
             const res = await componentService.resetComponent(this.resettingComp.id, payload);
@@ -666,9 +683,9 @@ export default {
 
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 label { font-size: 0.75rem; font-weight: 600; color: #3E3D90; text-transform: uppercase; letter-spacing: 0.5px; }
-textarea, input { padding: 0.75rem 1rem; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 0.2s; }
+textarea, input, select { padding: 0.75rem 1rem; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 0.2s; background: #fff; color: #374151; }
 textarea { min-height: 80px; resize: none; }
-input:focus, textarea:focus { border-color: #3E3D90; }
+input:focus, textarea:focus, select:focus { border-color: #3E3D90; }
 
 .replacement-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; margin-top: 0.5rem; }
 .replacement-header { font-size: 0.7rem; font-weight: 700; color: #3E3D90; text-transform: uppercase; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 5px; }

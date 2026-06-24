@@ -96,9 +96,11 @@ class KomponenArmadaController extends Controller
         $komponen = KomponenArmada::with('monitoring')->findOrFail($id);
         
         $validator = Validator::make($request->all(), [
-            'jumlah_liter' => 'nullable|numeric',
-            'catatan' => 'nullable|string',
-            'new_detail' => 'nullable|array'
+            'jumlah_liter'      => 'nullable|numeric',
+            'catatan'           => 'nullable|string',
+            'tanggal_pelepasan' => 'nullable|date',
+            'status_ban_bekas'  => 'nullable|in:VULK,JUAL',
+            'new_detail'        => 'nullable|array'
         ]);
 
         if ($validator->fails()) {
@@ -114,11 +116,11 @@ class KomponenArmadaController extends Controller
 
             $tanggal_pelepasan = $request->input('tanggal_pelepasan') ?: Carbon::now()->toDateString();
 
-            // 1. Update Old Detail with Release Date
+            // 1. Update Old Detail with Release Date & Status Ban Bekas
             if ($currentDetail) {
                 $currentDetail->update([
                     'tanggal_pelepasan' => $tanggal_pelepasan,
-                    'status_ban_bekas' => null 
+                    'status_ban_bekas'  => $request->status_ban_bekas ?? null,
                 ]);
             }
 
@@ -151,18 +153,30 @@ class KomponenArmadaController extends Controller
 
             $komponen->update($updateData);
 
-            // 4. Handle Identity Detail change (soalnya ada no seri baru)
-            if ($request->has('new_detail') && !empty($request->new_detail['nomor_seri'])) {
-                $komponen->update(['has_identity' => true]);
-                
-                $detailData = $request->new_detail;
-                $detailData['komponen_armada_id'] = $komponen->id;
-                
-                if (empty($detailData['tanggal_pemasangan'])) {
-                    $detailData['tanggal_pemasangan'] = Carbon::now()->toDateString();
-                }
+            // 4. Handle Identity Detail change (opsional - tidak harus isi nomor_seri)
+            if ($request->has('new_detail') && is_array($request->new_detail)) {
+                $detail = $request->new_detail;
 
-                DetailKomponenArmada::create($detailData);
+                // Cek apakah ada field yang bermakna diisi
+                $hasMeaningfulData = !empty($detail['nomor_seri'])
+                    || !empty($detail['nomor_stamp'])
+                    || !empty($detail['merk_tipe'])
+                    || !empty($detail['pemasok'])
+                    || !empty($detail['ukuran'])
+                    || (!empty($detail['harga']) && $detail['harga'] > 0);
+
+                if ($hasMeaningfulData) {
+                    $komponen->update(['has_identity' => true]);
+
+                    $detailData = $detail;
+                    $detailData['komponen_armada_id'] = $komponen->id;
+
+                    if (empty($detailData['tanggal_pemasangan'])) {
+                        $detailData['tanggal_pemasangan'] = Carbon::now()->toDateString();
+                    }
+
+                    DetailKomponenArmada::create($detailData);
+                }
             }
 
             DB::commit();
