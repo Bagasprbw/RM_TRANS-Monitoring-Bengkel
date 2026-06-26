@@ -91,6 +91,46 @@ services:
     networks:
       - app_network
 
+  # ─────────────────────────────────────────
+  # WEBHOOK: Auto-Deploy CI/CD
+  # ─────────────────────────────────────────
+  webhook:
+    image: almir/webhook
+    container_name: rm_trans_webhook
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-change_me}
+    volumes:
+      - ./webhook/hooks.json:/etc/webhook/hooks.json:ro
+      - ./deploy.sh:/deploy/deploy.sh:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $HOME/projects:/home/projects
+      - $HOME/.ssh:/root/.ssh:ro
+    command: ["-verbose", "-hooks=/etc/webhook/hooks.json", "-hotreload"]
+    networks:
+      - app_network
+
+  # ─────────────────────────────────────────
+  # CLOUDFLARE TUNNEL: Expose ke Internet
+  # (Aktifkan setelah setup tunnel di Cloudflare)
+  # ─────────────────────────────────────────
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: rm_trans_cloudflared
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflared:/etc/cloudflared:ro
+    depends_on:
+      - frontend
+      - nginx-backend
+    networks:
+      - app_network
+    profiles:
+      - tunnel  # Hanya aktif jika dijalankan dengan: docker compose --profile tunnel up -d
+
 # ─────────────────────────────────────────
 # VOLUMES & NETWORKS
 # ─────────────────────────────────────────

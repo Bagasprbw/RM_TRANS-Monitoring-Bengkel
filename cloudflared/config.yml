@@ -1,0 +1,24 @@
+# ================================================================
+# CLOUDFLARE TUNNEL CONFIG
+# Ganti nilai-nilai di bawah sesuai domain dan tunnel ID kamu
+# ================================================================
+
+tunnel: GANTI_DENGAN_TUNNEL_ID_KAMU
+credentials-file: /etc/cloudflared/creds.json
+
+ingress:
+  # Frontend Vue (akses utama)
+  - hostname: monitoring.DOMAINMU.COM
+    service: http://frontend:80
+
+  # Backend Laravel API
+  - hostname: api-monitoring.DOMAINMU.COM
+    service: http://nginx-backend:8000
+
+  # Webhook untuk CI/CD (endpoint deploy)
+  - hostname: monitoring.DOMAINMU.COM
+    path: /webhook
+    service: http://webhook:9000
+
+  # Wajib ada sebagai fallback terakhir
+  - service: http_status:404
