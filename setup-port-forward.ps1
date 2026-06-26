@@ -13,8 +13,8 @@ Write-Host "IP WSL terdeteksi: $wslIP" -ForegroundColor Green
 # Tambahkan port forwarding: Windows Port -> WSL IP
 Write-Host "Menambahkan port forwarding..." -ForegroundColor Yellow
 
-# Port 80 (Frontend)
-netsh interface portproxy add v4tov4 listenport=80 listenaddress=0.0.0.0 connectport=80 connectaddress=$wslIP
+# Port 8080 (Frontend)
+netsh interface portproxy add v4tov4 listenport=8080 listenaddress=0.0.0.0 connectport=8080 connectaddress=$wslIP
 # Port 8000 (Backend API)
 netsh interface portproxy add v4tov4 listenport=8000 listenaddress=0.0.0.0 connectport=8000 connectaddress=$wslIP
 # Port 9000 (Webhook CI/CD)
@@ -22,7 +22,7 @@ netsh interface portproxy add v4tov4 listenport=9000 listenaddress=0.0.0.0 conne
 
 # Buka port di Windows Firewall
 Write-Host "Membuka port di Windows Firewall..." -ForegroundColor Yellow
-netsh advfirewall firewall add rule name="RM TRANS - Frontend (80)" dir=in action=allow protocol=TCP localport=80
+netsh advfirewall firewall add rule name="RM TRANS - Frontend (8080)" dir=in action=allow protocol=TCP localport=8080
 netsh advfirewall firewall add rule name="RM TRANS - Backend API (8000)" dir=in action=allow protocol=TCP localport=8000
 netsh advfirewall firewall add rule name="RM TRANS - Webhook (9000)" dir=in action=allow protocol=TCP localport=9000
 
@@ -30,7 +30,7 @@ Write-Host ""
 Write-Host "=========================================" -ForegroundColor Green
 Write-Host " Selesai! Port forwarding sudah aktif." -ForegroundColor Green
 Write-Host " IP Windows kamu: $(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias Ethernet* | Select-Object -First 1 -ExpandProperty IPAddress)" -ForegroundColor Green
-Write-Host " Akses dari browser: http://<IP-Windows-kamu>" -ForegroundColor Green
+Write-Host " Akses dari browser: http://<IP-Windows-kamu>:8080" -ForegroundColor Green
 Write-Host "=========================================" -ForegroundColor Green
 
 Write-Host ""
