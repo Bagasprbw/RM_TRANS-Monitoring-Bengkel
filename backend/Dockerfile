@@ -12,7 +12,7 @@ RUN composer install \
     --no-dev \
     --no-interaction \
     --no-scripts \
-    --prefer-dist \
+    --prefer-source \
     --optimize-autoloader \
     --ignore-platform-reqs
 
