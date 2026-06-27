@@ -17,10 +17,11 @@ cd "$PROJECT_DIR"
 echo "[1/4] Pulling latest code dari GitHub..."
 git pull origin main
 
-echo "[2/4] Rebuild dan restart containers..."
-docker compose up --build -d
+echo "[2/4] Pulling latest Docker images..."
+docker compose pull
 
-echo "[3/4] Menunggu containers siap (30 detik)..."
+echo "[3/4] Restarting containers..."
+docker compose up -d
 sleep 30
 
 echo "[4/4] Membersihkan image lama yang tidak terpakai..."

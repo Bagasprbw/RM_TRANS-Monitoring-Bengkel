@@ -29,9 +29,7 @@ services:
   # BACKEND: Laravel (PHP-FPM)
   # ─────────────────────────────────────────
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/ronaltama/rm_trans-monitoring-bengkel/backend:latest
     container_name: rm_trans_backend
     restart: unless-stopped
     environment:
@@ -79,9 +77,7 @@ services:
   # FRONTEND: Vue 2 (Vite Build) + Nginx
   # ─────────────────────────────────────────
   frontend:
-    build:
-      context: ./Frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/ronaltama/rm_trans-monitoring-bengkel/frontend:latest
     container_name: rm_trans_frontend
     restart: unless-stopped
     ports:
