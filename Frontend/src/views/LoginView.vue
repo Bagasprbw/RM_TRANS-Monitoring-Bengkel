@@ -90,7 +90,7 @@
 
       </form>
 
-      <p class="footer-text">© 2025 RM Trans · All rights reserved</p>
+      <p class="footer-text">© 2026 RM Trans · All rights reserved</p>
     </div>
   </div>
 </template>
