@@ -16,10 +16,11 @@
       },
     },
     server: {
-      port: 3000,
+      host: '0.0.0.0',
+      port: 8085,
       proxy: {
         '/api': {
-          target: 'http://localhost:8000',
+          target: 'http://localhost:8005',
           changeOrigin: true,
         },
       },
