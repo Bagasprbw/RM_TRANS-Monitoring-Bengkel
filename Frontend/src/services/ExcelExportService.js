@@ -36,7 +36,12 @@ export default class ExcelExportService {
     };
 
     // Determine layout based on category
-    const normalizedCat = (categoryName || '').toLowerCase();
+    let resolvedCategory = categoryName;
+    if (!resolvedCategory || resolvedCategory === 'Semua Kategori') {
+      const detected = this.detectCategoryFromData(data);
+      if (detected) resolvedCategory = detected;
+    }
+    const normalizedCat = (resolvedCategory || '').toLowerCase();
 
     if (normalizedCat.includes('ban')) {
       this.setupBanLayout(worksheet, data, headerStyle, cellStyle, filters);
@@ -58,6 +63,19 @@ export default class ExcelExportService {
     saveAs(new Blob([buffer]), fileName);
   }
 
+  static detectCategoryFromData(data) {
+    if (!data || data.length === 0) return null;
+    const counts = {};
+    data.forEach(item => {
+      const name = item.komponen?.kategori?.nama_kategori;
+      if (name) {
+        counts[name] = (counts[name] || 0) + 1;
+      }
+    });
+    if (Object.keys(counts).length === 0) return null;
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  }
+
   static setupBanLayout(ws, data, hStyle, cStyle, filters) {
     ws.mergeCells('A1:M1');
     ws.getCell('A1').value = 'BAN TERPASANG';
@@ -71,7 +89,7 @@ export default class ExcelExportService {
     }
 
     const headers = [
-      'NO', 'NOPOL', 'JENIS KENDARAAN', 'JENIS (ORI/VULK)', 'SUPLIYER', 'MERK/TYPE/UK', 
+      'NO', 'NOPOL', 'JENIS KENDARAAN', 'JENIS BAN', 'SUPLIYER', 'MERK/TYPE/UK', 
       'NO SERI', 'NO STAMP', 'TGL PASANG', 'TGL LEPAS', 
       'SPEDOMETER PEMASANGAN', 'BAN BEKAS', 'HARGA'
     ];
@@ -84,7 +102,7 @@ export default class ExcelExportService {
       groups[pos].push(item);
     });
 
-    let currentRow = 2;
+    let currentRow = filters?.date_from || filters?.date_to ? 3 : 2;
     Object.keys(groups).forEach(pos => {
       // Add Position Header
       ws.mergeCells(`A${currentRow}:M${currentRow}`);

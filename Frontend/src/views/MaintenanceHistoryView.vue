@@ -229,6 +229,7 @@ import Sidebar from '@/components/Sidebar.vue'
 import { mapState, mapActions } from 'vuex'
 import axios from '@/core/axios'
 import ExcelExportService from '@/services/ExcelExportService'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'MaintenanceHistoryView',
@@ -301,30 +302,40 @@ export default {
       }
     },
     async handleExport() {
+      if (this.loading) {
+        Swal.fire('Mohon Tunggu', 'Data masih dimuat, silakan tunggu beberapa saat.', 'warning')
+        return
+      }
       this.exporting = true
       try {
-        // Fetch all data matching current filters
         const params = {
           export: 'true',
           category_id: this.filters.category_id,
           search: this.filters.search,
-          date_from: this.filters.date_from,
-          date_to: this.filters.date_to
+          date_from: this.filters.date_from || undefined,
+          date_to: this.filters.date_to || undefined
         }
         const res = await axios.get('/riwayat_perawatan', { params })
         if (res.data.status === 'success') {
           const allData = res.data.data
+          if (!allData || allData.length === 0) {
+            Swal.fire('Data Kosong', 'Tidak ada data untuk diexport dengan filter yang dipilih.', 'info')
+            return
+          }
           const categoryName = this.filters.category_id 
             ? this.kategoriList.find(c => c.id === this.filters.category_id)?.nama_kategori 
             : 'Semua Kategori'
           
           await ExcelExportService.exportRiwayat(allData, {
             categoryName,
-            filters: this.filters
+            filters: { ...this.filters }
           })
+        } else {
+          Swal.fire('Export Gagal', res.data.message || 'Terjadi kesalahan saat mengambil data.', 'error')
         }
       } catch (err) {
         console.error('Export error:', err)
+        Swal.fire('Export Gagal', err.response?.data?.message || err.message || 'Terjadi kesalahan tak terduga.', 'error')
       } finally {
         this.exporting = false
       }

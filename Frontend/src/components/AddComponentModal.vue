@@ -113,7 +113,8 @@
                       <label>Jenis Ban</label>
                       <select v-model="form.detail.jenis_ban">
                         <option value="ORI">ORI</option>
-                        <option value="VULK">VULK</option>
+                        <option value="VULK PEMBELIAN">VULK PEMBELIAN</option>
+                        <option value="VULK JASA">VULK JASA</option>
                       </select>
                     </div>
                     <div class="form-group">

@@ -198,7 +198,8 @@
                                 <label>Jenis Ban</label>
                                 <select v-model="resetForm.new_detail.jenis_ban">
                                     <option value="ORI">ORI</option>
-                                    <option value="VULK">VULK</option>
+                                    <option value="VULK PEMBELIAN">VULK PEMBELIAN</option>
+                                    <option value="VULK JASA">VULK JASA</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -239,8 +240,9 @@
                             <label>Status Ban Bekas <span style="color:#94a3b8;font-weight:400;font-size:0.7rem;">(Ban yang dilepas)</span></label>
                             <select v-model="resetForm.status_ban_bekas">
                                 <option :value="null">-- Pilih Status --</option>
-                                <option value="VULK">VULK (Di-Vulkanisir)</option>
-                                <option value="JUAL">JUAL (Dijual)</option>
+                                <option value="ORI">ORI</option>
+                                <option value="VULK PEMBELIAN">VULK PEMBELIAN</option>
+                                <option value="VULK JASA">VULK JASA</option>
                             </select>
                         </div>
                     </div>
