@@ -12,8 +12,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @group Komponen Armada
+ *
+ * APIs for managing components of monitored vehicles.
+ */
 class KomponenArmadaController extends Controller
 {
+    /**
+     * List all komponen for a monitoring
+     *
+     * Get all components for a specific monitoring record with health calculation.
+     *
+     * @urlParam monitoringId int required The monitoring ID.
+     */
     public function index($monitoringId)
     {
         $components = KomponenArmada::with(['kategori', 'detail' => function ($q) {
@@ -41,6 +53,25 @@ class KomponenArmadaController extends Controller
         ]);
     }
 
+    /**
+     * Add component to monitoring
+     *
+     * @urlParam monitoringId int required The monitoring ID.
+     *
+     * @bodyParam kategori_komponen_id int required The category ID.
+     * @bodyParam nama_komponen string required Component name (max 100 chars).
+     * @bodyParam tipe_pelacakan string required Tracking type. Options: km, date, days.
+     * @bodyParam target_km numeric Required if tipe_pelacakan is 'km'.
+     * @bodyParam target_tanggal date Required if tipe_pelacakan is 'date'.
+     * @bodyParam target_hari int Required if tipe_pelacakan is 'days'.
+     * @bodyParam has_identity boolean Optional Whether component has identity detail.
+     * @bodyParam detail array Optional Identity detail data.
+     *
+     * @response 201 {
+     *   "status": "success",
+     *   "data": {...}
+     * }
+     */
     public function store(Request $request, $monitoringId)
     {
         $validator = Validator::make($request->all(), [
@@ -93,6 +124,21 @@ class KomponenArmadaController extends Controller
         }
     }
 
+    /**
+     * Reset component
+     *
+     * Reset component tracking baseline after maintenance.
+     *
+     * @urlParam id int required The component ID.
+     *
+     * @bodyParam target_km numeric Optional Override target KM after reset.
+     * @bodyParam target_tanggal date Optional Override target date after reset.
+     * @bodyParam jumlah_liter numeric Optional Fluid volume (liters).
+     * @bodyParam catatan string Optional Maintenance notes.
+     * @bodyParam tanggal_pelepasan date Optional Release date. Defaults to today.
+     * @bodyParam status_ban_bekas string Optional Used tire status. Options: ORI, VULK PEMBELIAN, VULK JASA.
+     * @bodyParam new_detail array Optional New identity detail data.
+     */
     public function reset(Request $request, $id)
     {
         $komponen = KomponenArmada::with('monitoring')->findOrFail($id);
@@ -204,6 +250,20 @@ class KomponenArmadaController extends Controller
         }
     }
 
+    /**
+     * Update component
+     *
+     * @urlParam id int required The component ID.
+     *
+     * @bodyParam kategori_komponen_id int required The category ID.
+     * @bodyParam nama_komponen string required Component name.
+     * @bodyParam tipe_pelacakan string required Tracking type. Options: km, date, days.
+     * @bodyParam target_km numeric Required if tipe_pelacakan is 'km'.
+     * @bodyParam target_tanggal date Required if tipe_pelacakan is 'date'.
+     * @bodyParam target_hari int Required if tipe_pelacakan is 'days'.
+     * @bodyParam has_identity boolean Optional Whether component has identity detail.
+     * @bodyParam detail array Optional Identity detail data.
+     */
     public function update(Request $request, $id)
     {
         $komponen = KomponenArmada::findOrFail($id);
@@ -263,6 +323,16 @@ class KomponenArmadaController extends Controller
         }
     }
 
+    /**
+     * Delete component
+     *
+     * @urlParam id int required The component ID.
+     *
+     * @response {
+     *   "status": "success",
+     *   "message": "Komponen berhasil dihapus"
+     * }
+     */
     public function destroy($id)
     {
         $komponen = KomponenArmada::findOrFail($id);

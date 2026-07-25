@@ -1,0 +1,565 @@
+name: 'Komponen Armada'
+description: |-
+
+  APIs for managing components of monitored vehicles.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/monitoring_armada_aktif/{monitoring_id}/komponen'
+    metadata:
+      custom: []
+      groupName: 'Komponen Armada'
+      groupDescription: |-
+
+        APIs for managing components of monitored vehicles.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List all komponen for a monitoring'
+      description: 'Get all components for a specific monitoring record with health calculation.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      monitoring_id:
+        custom: []
+        name: monitoring_id
+        description: 'The ID of the monitoring.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      monitoringId:
+        custom: []
+        name: monitoringId
+        description: 'The monitoring ID.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      monitoring_id: architecto
+      monitoringId: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/monitoring_armada_aktif/{monitoring_id}/komponen'
+    metadata:
+      custom: []
+      groupName: 'Komponen Armada'
+      groupDescription: |-
+
+        APIs for managing components of monitored vehicles.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Add component to monitoring'
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      monitoring_id:
+        custom: []
+        name: monitoring_id
+        description: 'The ID of the monitoring.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      monitoringId:
+        custom: []
+        name: monitoringId
+        description: 'The monitoring ID.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      monitoring_id: architecto
+      monitoringId: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      kategori_komponen_id:
+        custom: []
+        name: kategori_komponen_id
+        description: 'The category ID.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      nama_komponen:
+        custom: []
+        name: nama_komponen
+        description: 'Component name (max 100 chars).'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      tipe_pelacakan:
+        custom: []
+        name: tipe_pelacakan
+        description: 'Tracking type. Options: km, date, days.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      target_km:
+        custom: []
+        name: target_km
+        description: "Required if tipe_pelacakan is 'km'."
+        required: false
+        example: architecto
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      target_tanggal:
+        custom: []
+        name: target_tanggal
+        description: "Required if tipe_pelacakan is 'date'."
+        required: false
+        example: architecto
+        type: date
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      target_hari:
+        custom: []
+        name: target_hari
+        description: "Required if tipe_pelacakan is 'days'."
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      has_identity:
+        custom: []
+        name: has_identity
+        description: 'Optional Whether component has identity detail.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      detail:
+        custom: []
+        name: detail
+        description: 'Optional Identity detail data.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      kategori_komponen_id: 16
+      nama_komponen: architecto
+      tipe_pelacakan: architecto
+      target_km: architecto
+      target_tanggal: architecto
+      target_hari: 16
+      has_identity: false
+      detail:
+        - architecto
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: |-
+          {
+            "status": "success",
+            "data": {...}
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/komponen_armada/{id}/reset'
+    metadata:
+      custom: []
+      groupName: 'Komponen Armada'
+      groupDescription: |-
+
+        APIs for managing components of monitored vehicles.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Reset component'
+      description: 'Reset component tracking baseline after maintenance.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The component ID.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      jumlah_liter:
+        custom: []
+        name: jumlah_liter
+        description: 'Optional Fluid volume (liters).'
+        required: false
+        example: architecto
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      catatan:
+        custom: []
+        name: catatan
+        description: 'Optional Maintenance notes.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      tanggal_pelepasan:
+        custom: []
+        name: tanggal_pelepasan
+        description: 'Optional Release date. Defaults to today.'
+        required: false
+        example: architecto
+        type: date
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status_ban_bekas:
+        custom: []
+        name: status_ban_bekas
+        description: 'Optional Used tire status. Options: ORI, VULK PEMBELIAN, VULK JASA.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      new_detail:
+        custom: []
+        name: new_detail
+        description: 'Optional New identity detail data.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      target_km:
+        custom: []
+        name: target_km
+        description: 'Optional Override target KM after reset.'
+        required: false
+        example: architecto
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      target_tanggal:
+        custom: []
+        name: target_tanggal
+        description: 'Optional Override target date after reset.'
+        required: false
+        example: architecto
+        type: date
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      jumlah_liter: architecto
+      catatan: architecto
+      tanggal_pelepasan: architecto
+      status_ban_bekas: architecto
+      new_detail:
+        - architecto
+      target_km: architecto
+      target_tanggal: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/komponen_armada/{id}'
+    metadata:
+      custom: []
+      groupName: 'Komponen Armada'
+      groupDescription: |-
+
+        APIs for managing components of monitored vehicles.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update component'
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The component ID.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      kategori_komponen_id:
+        custom: []
+        name: kategori_komponen_id
+        description: 'The category ID.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      nama_komponen:
+        custom: []
+        name: nama_komponen
+        description: 'Component name.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      tipe_pelacakan:
+        custom: []
+        name: tipe_pelacakan
+        description: 'Tracking type. Options: km, date, days.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      target_km:
+        custom: []
+        name: target_km
+        description: "Required if tipe_pelacakan is 'km'."
+        required: false
+        example: architecto
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      target_tanggal:
+        custom: []
+        name: target_tanggal
+        description: "Required if tipe_pelacakan is 'date'."
+        required: false
+        example: architecto
+        type: date
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      target_hari:
+        custom: []
+        name: target_hari
+        description: "Required if tipe_pelacakan is 'days'."
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      has_identity:
+        custom: []
+        name: has_identity
+        description: 'Optional Whether component has identity detail.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      detail:
+        custom: []
+        name: detail
+        description: 'Optional Identity detail data.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      kategori_komponen_id: 16
+      nama_komponen: architecto
+      tipe_pelacakan: architecto
+      target_km: architecto
+      target_tanggal: architecto
+      target_hari: 16
+      has_identity: false
+      detail:
+        - architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/komponen_armada/{id}'
+    metadata:
+      custom: []
+      groupName: 'Komponen Armada'
+      groupDescription: |-
+
+        APIs for managing components of monitored vehicles.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete component'
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The component ID.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "status": "success",
+            "message": "Komponen berhasil dihapus"
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

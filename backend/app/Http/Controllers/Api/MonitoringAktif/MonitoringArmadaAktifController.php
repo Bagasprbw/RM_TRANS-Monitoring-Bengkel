@@ -5,21 +5,37 @@ namespace App\Http\Controllers\Api\MonitoringAktif;
 use App\Http\Controllers\Controller;
 use App\Models\Armada;
 use App\Models\MonitoringArmadaAktif;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
 
+/**
+ * @group Monitoring Armada Aktif
+ *
+ * APIs for managing active fleet monitoring.
+ */
 class MonitoringArmadaAktifController extends Controller
 {
+    /**
+     * List all active monitoring
+     *
+     * Get all active monitoring records with related armada, jenis, and merk data.
+     */
     public function index()
     {
         $monitoring = MonitoringArmadaAktif::with(['armada.jenis', 'armada.merk'])->get();
+
         return response()->json([
             'status' => 'success',
-            'data'   => $monitoring
+            'data' => $monitoring,
         ]);
     }
 
+    /**
+     * Get health reminders
+     *
+     * Get components with health status &lt;= 15% that need attention.
+     */
     public function reminders()
     {
         $monitoring = MonitoringArmadaAktif::with(['armada.jenis', 'armada.merk', 'komponen.kategori'])
@@ -31,7 +47,7 @@ class MonitoringArmadaAktifController extends Controller
         foreach ($monitoring as $mon) {
             foreach ($mon->komponen as $komp) {
                 $healthData = $komp->calculateHealth($mon->last_recorded_km);
-                
+
                 if ($healthData['health'] <= 15) {
                     $reminders[] = [
                         'id' => $komp->id,
@@ -44,7 +60,7 @@ class MonitoringArmadaAktifController extends Controller
                         'health' => $healthData['health'],
                         'status' => $healthData['remaining'],
                         'badgeClass' => $healthData['health'] <= 5 ? 'badge-red' : ($healthData['health'] <= 10 ? 'badge-orange' : 'badge-yellow'),
-                        'dotClass' => $healthData['health'] <= 5 ? 'dot-red' : ($healthData['health'] <= 10 ? 'dot-orange' : 'dot-yellow')
+                        'dotClass' => $healthData['health'] <= 5 ? 'dot-red' : ($healthData['health'] <= 10 ? 'dot-orange' : 'dot-yellow'),
                     ];
                 }
             }
@@ -52,10 +68,15 @@ class MonitoringArmadaAktifController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $reminders
+            'data' => $reminders,
         ]);
     }
 
+    /**
+     * Get available armada
+     *
+     * Get all armada that are not currently under active monitoring.
+     */
     public function availableArmada()
     {
         // Get all armadas that do NOT have active monitoring
@@ -67,85 +88,119 @@ class MonitoringArmadaAktifController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $armadas
+            'data' => $armadas,
         ]);
     }
 
+    /**
+     * Start monitoring a vehicle
+     *
+     * @bodyParam armada_id int required The armada ID (must not be currently monitored).
+     * @bodyParam last_recorded_km numeric required Current odometer reading.
+     * @bodyParam status string Optional Monitoring status. Default 'aktif'. Options: aktif, nonaktif.
+     * @bodyParam spedo_status string Optional Speedometer status. Default 'HIDUP'. Options: HIDUP, MATI.
+     * @bodyParam keterangan string Optional Notes.
+     *
+     * @response 201 {
+     *   "status": "success",
+     *   "message": "Monitoring kendaraan berhasil ditambahkan",
+     *   "data": {...}
+     * }
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'armada_id'        => 'required|exists:armada,id|unique:monitoring_armada_aktif,armada_id,NULL,id,status,aktif',
+            'armada_id' => 'required|exists:armada,id|unique:monitoring_armada_aktif,armada_id,NULL,id,status,aktif',
             'last_recorded_km' => 'required|numeric|min:0',
-            'status'           => 'nullable|in:aktif,nonaktif',
-            'spedo_status'     => 'nullable|in:HIDUP,MATI',
-            'keterangan'       => 'nullable|string'
+            'status' => 'nullable|in:aktif,nonaktif',
+            'spedo_status' => 'nullable|in:HIDUP,MATI',
+            'keterangan' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Validation error',
-                'errors'  => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         try {
             $monitoring = MonitoringArmadaAktif::create([
-                'armada_id'                => $request->armada_id,
-                'last_recorded_km'         => $request->last_recorded_km,
-                'status'                   => $request->status ?? 'aktif',
-                'spedo_status'             => $request->spedo_status ?? 'HIDUP',
+                'armada_id' => $request->armada_id,
+                'last_recorded_km' => $request->last_recorded_km,
+                'status' => $request->status ?? 'aktif',
+                'spedo_status' => $request->spedo_status ?? 'HIDUP',
                 'tanggal_mulai_monitoring' => Carbon::now()->toDateString(),
-                'keterangan'               => $request->keterangan ?? '-'
+                'keterangan' => $request->keterangan ?? '-',
             ]);
 
             return response()->json([
-                'status'  => 'success',
+                'status' => 'success',
                 'message' => 'Monitoring kendaraan berhasil ditambahkan',
-                'data'    => $monitoring
+                'data' => $monitoring,
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Gagal menambahkan monitoring kendaraan: ' . $e->getMessage()
+                'status' => 'error',
+                'message' => 'Gagal menambahkan monitoring kendaraan: '.$e->getMessage(),
             ], 500);
         }
     }
 
+    /**
+     * Get monitoring detail
+     *
+     * @urlParam id int required The monitoring ID.
+     */
     public function show($id)
     {
         $monitoring = MonitoringArmadaAktif::with(['armada.jenis', 'armada.merk'])->find($id);
-        if (!$monitoring) {
+        if (! $monitoring) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Monitoring kendaraan tidak ditemukan'
+                'status' => 'error',
+                'message' => 'Monitoring kendaraan tidak ditemukan',
             ], 404);
         }
+
         return response()->json([
             'status' => 'success',
-            'data'   => $monitoring
+            'data' => $monitoring,
         ]);
     }
 
+    /**
+     * Update monitoring status
+     *
+     * @urlParam id int required The monitoring ID.
+     *
+     * @bodyParam status string required Monitoring status. Options: aktif, nonaktif.
+     *
+     * @response {
+     *   "status": "success",
+     *   "message": "Status monitoring berhasil diupdate",
+     *   "data": {...}
+     * }
+     */
     public function update(Request $request, $id)
     {
         $monitoring = MonitoringArmadaAktif::find($id);
-        if (!$monitoring) {
+        if (! $monitoring) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Monitoring kendaraan tidak ditemukan'
+                'status' => 'error',
+                'message' => 'Monitoring kendaraan tidak ditemukan',
             ], 404);
         }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'required|in:aktif,nonaktif'
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Validation error',
-                'errors'  => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -155,20 +210,30 @@ class MonitoringArmadaAktifController extends Controller
         $monitoring->load('armada.jenis', 'armada.merk');
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Status monitoring berhasil diupdate',
-            'data'    => $monitoring
+            'data' => $monitoring,
         ]);
     }
 
+    /**
+     * Delete monitoring
+     *
+     * @urlParam id int required The monitoring ID.
+     *
+     * @response {
+     *   "status": "success",
+     *   "message": "Monitoring kendaraan berhasil dihapus"
+     * }
+     */
     public function destroy($id)
     {
         $monitoring = MonitoringArmadaAktif::find($id);
 
-        if (!$monitoring) {
+        if (! $monitoring) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Monitoring kendaraan tidak ditemukan'
+                'status' => 'error',
+                'message' => 'Monitoring kendaraan tidak ditemukan',
             ], 404);
         }
 
@@ -177,13 +242,13 @@ class MonitoringArmadaAktifController extends Controller
             $monitoring->delete();
 
             return response()->json([
-                'status'  => 'success',
-                'message' => 'Monitoring kendaraan berhasil dihapus'
+                'status' => 'success',
+                'message' => 'Monitoring kendaraan berhasil dihapus',
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Gagal menghapus monitoring kendaraan: ' . $e->getMessage()
+                'status' => 'error',
+                'message' => 'Gagal menghapus monitoring kendaraan: '.$e->getMessage(),
             ], 500);
         }
     }

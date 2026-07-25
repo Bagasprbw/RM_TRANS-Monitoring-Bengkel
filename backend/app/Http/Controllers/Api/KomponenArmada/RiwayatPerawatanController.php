@@ -6,8 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\RiwayatPerawatanKomponen;
 use Illuminate\Http\Request;
 
+/**
+ * @group Riwayat Perawatan
+ *
+ * APIs for viewing maintenance history records.
+ */
 class RiwayatPerawatanController extends Controller
 {
+    /**
+     * List maintenance history
+     *
+     * Get paginated list of maintenance history with optional filters.
+     *
+     * @queryParam search string Optional Search by NOPOL, component name, or notes.
+     * @queryParam category_id int Optional Filter by category ID.
+     * @queryParam date_from date Optional Filter start date.
+     * @queryParam date_to date Optional Filter end date.
+     * @queryParam limit int Optional Results per page. Default 15.
+     * @queryParam export string Optional Set to 'true' to export all results without pagination.
+     */
     public function index(Request $request)
     {
         $query = RiwayatPerawatanKomponen::with([

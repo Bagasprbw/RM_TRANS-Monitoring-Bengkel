@@ -1,0 +1,116 @@
+name: 'Log Kilometer'
+description: |-
+
+  APIs for managing odometer logs.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/log_kilometer
+    metadata:
+      custom: []
+      groupName: 'Log Kilometer'
+      groupDescription: |-
+
+        APIs for managing odometer logs.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List all kilometer logs'
+      description: 'Get all odometer logs with related armada data, ordered by input date.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/log_kilometer
+    metadata:
+      custom: []
+      groupName: 'Log Kilometer'
+      groupDescription: |-
+
+        APIs for managing odometer logs.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Log new kilometer reading'
+      description: 'Record a new odometer reading for a monitored vehicle.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      armada_id:
+        custom: []
+        name: armada_id
+        description: 'The armada ID (must be actively monitored).'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      odometer_km:
+        custom: []
+        name: odometer_km
+        description: 'Current odometer reading (must be greater than last recorded).'
+        required: true
+        example: architecto
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      armada_id: 16
+      odometer_km: architecto
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: |-
+          {
+            "status": "success",
+            "message": "Kilometer berhasil diupdate",
+            "data": {...},
+            "updated_monitoring": {...}
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
