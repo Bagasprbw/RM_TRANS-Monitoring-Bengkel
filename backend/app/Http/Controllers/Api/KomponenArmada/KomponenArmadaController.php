@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\Api\KomponenArmada;
 
 use App\Http\Controllers\Controller;
-use App\Models\KomponenArmada;
 use App\Models\DetailKomponenArmada;
+use App\Models\KomponenArmada;
 use App\Models\MonitoringArmadaAktif;
 use App\Models\RiwayatPerawatanKomponen;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class KomponenArmadaController extends Controller
 {
     public function index($monitoringId)
     {
-        $components = KomponenArmada::with(['kategori', 'detail' => function($q) {
-                $q->orderBy('id', 'desc'); // Assuming higher ID is newer if non-timestamped, or use timestamps if needed
-            }])
+        $components = KomponenArmada::with(['kategori', 'detail' => function ($q) {
+            $q->orderBy('id', 'desc'); // Assuming higher ID is newer if non-timestamped, or use timestamps if needed
+        }])
             ->where('monitoring_armada_id', $monitoringId)
             ->get();
 
@@ -27,7 +27,7 @@ class KomponenArmadaController extends Controller
 
         $data = $components->map(function ($comp) use ($currentKm) {
             $healthData = $comp->calculateHealth($currentKm);
-            
+
             $compArray = $comp->toArray();
             $compArray['health'] = $healthData['health'];
             $compArray['remaining'] = $healthData['remaining'];
@@ -37,7 +37,7 @@ class KomponenArmadaController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $data
+            'data' => $data,
         ]);
     }
 
@@ -51,7 +51,7 @@ class KomponenArmadaController extends Controller
             'target_tanggal' => 'required_if:tipe_pelacakan,date|nullable|date',
             'target_hari' => 'required_if:tipe_pelacakan,days|nullable|numeric',
             'has_identity' => 'boolean',
-            'detail' => 'nullable|array'
+            'detail' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -79,14 +79,16 @@ class KomponenArmadaController extends Controller
 
             if ($request->has_identity && $request->has('detail')) {
                 DetailKomponenArmada::create(array_merge($request->detail, [
-                    'komponen_armada_id' => $komponen->id
+                    'komponen_armada_id' => $komponen->id,
                 ]));
             }
 
             DB::commit();
+
             return response()->json(['status' => 'success', 'data' => $komponen], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -94,13 +96,13 @@ class KomponenArmadaController extends Controller
     public function reset(Request $request, $id)
     {
         $komponen = KomponenArmada::with('monitoring')->findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
-            'jumlah_liter'      => 'nullable|numeric',
-            'catatan'           => 'nullable|string',
+            'jumlah_liter' => 'nullable|numeric',
+            'catatan' => 'nullable|string',
             'tanggal_pelepasan' => 'nullable|date',
-            'status_ban_bekas'  => 'nullable|in:VULK,JUAL',
-            'new_detail'        => 'nullable|array'
+            'status_ban_bekas' => 'nullable|in:ORI,VULK PEMBELIAN,VULK JASA',
+            'new_detail' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -111,7 +113,7 @@ class KomponenArmadaController extends Controller
             DB::beginTransaction();
 
             $monitoring = $komponen->monitoring;
-            
+
             $currentDetail = $komponen->detail()->latest('id')->first();
 
             $tanggal_pelepasan = $request->input('tanggal_pelepasan') ?: Carbon::now()->toDateString();
@@ -120,7 +122,7 @@ class KomponenArmadaController extends Controller
             if ($currentDetail) {
                 $currentDetail->update([
                     'tanggal_pelepasan' => $tanggal_pelepasan,
-                    'status_ban_bekas'  => $request->status_ban_bekas ?? null,
+                    'status_ban_bekas' => $request->status_ban_bekas ?? null,
                 ]);
             }
 
@@ -138,7 +140,7 @@ class KomponenArmadaController extends Controller
             $updateData = [
                 'km_terakhir_perawatan' => $monitoring ? $monitoring->last_recorded_km : 0,
                 'tanggal_terakhir_perawatan' => $tanggal_pelepasan,
-                'status' => 'active'
+                'status' => 'active',
             ];
 
             // If it's date based or days based we want to advance the target_tanggal/baseline correctly
@@ -148,8 +150,12 @@ class KomponenArmadaController extends Controller
             }
 
             // Also allow manual override from request if provided
-            if ($request->has('target_km')) $updateData['target_km'] = $request->target_km;
-            if ($request->has('target_tanggal')) $updateData['target_tanggal'] = $request->target_tanggal;
+            if ($request->has('target_km')) {
+                $updateData['target_km'] = $request->target_km;
+            }
+            if ($request->has('target_tanggal')) {
+                $updateData['target_tanggal'] = $request->target_tanggal;
+            }
 
             $komponen->update($updateData);
 
@@ -158,12 +164,12 @@ class KomponenArmadaController extends Controller
                 $detail = $request->new_detail;
 
                 // Cek apakah ada field yang bermakna diisi
-                $hasMeaningfulData = !empty($detail['nomor_seri'])
-                    || !empty($detail['nomor_stamp'])
-                    || !empty($detail['merk_tipe'])
-                    || !empty($detail['pemasok'])
-                    || !empty($detail['ukuran'])
-                    || (!empty($detail['harga']) && $detail['harga'] > 0);
+                $hasMeaningfulData = ! empty($detail['nomor_seri'])
+                    || ! empty($detail['nomor_stamp'])
+                    || ! empty($detail['merk_tipe'])
+                    || ! empty($detail['pemasok'])
+                    || ! empty($detail['ukuran'])
+                    || (! empty($detail['harga']) && $detail['harga'] > 0);
 
                 if ($hasMeaningfulData) {
                     $komponen->update(['has_identity' => true]);
@@ -180,6 +186,7 @@ class KomponenArmadaController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['status' => 'success', 'message' => 'Komponen berhasil direset']);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -187,11 +194,12 @@ class KomponenArmadaController extends Controller
                 'id' => $id,
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
+
             return response()->json([
-                'status' => 'error', 
-                'message' => 'Gagal mereset: ' . $e->getMessage()
+                'status' => 'error',
+                'message' => 'Gagal mereset: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -199,7 +207,7 @@ class KomponenArmadaController extends Controller
     public function update(Request $request, $id)
     {
         $komponen = KomponenArmada::findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
             'kategori_komponen_id' => 'required|exists:category_componen,id',
             'nama_komponen' => 'required|string|max:100',
@@ -208,7 +216,7 @@ class KomponenArmadaController extends Controller
             'target_tanggal' => 'required_if:tipe_pelacakan,date|nullable|date',
             'target_hari' => 'required_if:tipe_pelacakan,days|nullable|numeric',
             'has_identity' => 'boolean',
-            'detail' => 'nullable|array'
+            'detail' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -233,22 +241,24 @@ class KomponenArmadaController extends Controller
                 $latestDetail = DetailKomponenArmada::where('komponen_armada_id', $komponen->id)
                     ->latest('id')
                     ->first();
-                    
+
                 if ($latestDetail) {
                     $latestDetail->update($request->detail);
                 } else {
                     DetailKomponenArmada::create(array_merge($request->detail, [
-                        'komponen_armada_id' => $komponen->id
+                        'komponen_armada_id' => $komponen->id,
                     ]));
                 }
-            } else if (!$request->has_identity) {
+            } elseif (! $request->has_identity) {
                 // If it is toggled off, we don't necessarily delete the history, but it won't be editable here anymore.
             }
 
             DB::commit();
+
             return response()->json(['status' => 'success', 'data' => $komponen], 200);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -257,6 +267,7 @@ class KomponenArmadaController extends Controller
     {
         $komponen = KomponenArmada::findOrFail($id);
         $komponen->delete();
+
         return response()->json(['status' => 'success', 'message' => 'Komponen berhasil dihapus']);
     }
 }

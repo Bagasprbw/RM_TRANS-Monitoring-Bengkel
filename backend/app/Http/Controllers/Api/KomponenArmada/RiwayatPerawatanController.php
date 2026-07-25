@@ -14,36 +14,41 @@ class RiwayatPerawatanController extends Controller
             'komponen.kategori',
             'komponen.monitoring.armada.jenis',
             'komponen.monitoring.armada.merk',
-            'detailKomponen'
+            'detailKomponen',
         ]);
 
         if ($request->has('category_id') && $request->category_id != '') {
-            $query->whereHas('komponen', function($q) use ($request) {
+            $query->whereHas('komponen', function ($q) use ($request) {
                 $q->where('kategori_komponen_id', $request->category_id);
             });
         }
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('komponen.monitoring.armada', function($sq) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('komponen.monitoring.armada', function ($sq) use ($search) {
                     $sq->where('nopol', 'like', "%$search%");
-                })->orWhereHas('komponen', function($sq) use ($search) {
+                })->orWhereHas('komponen', function ($sq) use ($search) {
                     $sq->where('nama_komponen', 'like', "%$search%");
                 })->orWhere('catatan', 'like', "%$search%");
             });
         }
 
-        if ($request->has('date_from') && $request->date_from != '') {
+        if ($request->filled('date_from') && $request->filled('date_to')) {
+            if ($request->date_from === $request->date_to) {
+                $query->whereDate('tanggal_selesai', $request->date_from);
+            } else {
+                $query->whereDate('tanggal_selesai', '>=', $request->date_from);
+                $query->whereDate('tanggal_selesai', '<=', $request->date_to);
+            }
+        } elseif ($request->filled('date_from')) {
             $query->whereDate('tanggal_selesai', '>=', $request->date_from);
-        }
-
-        if ($request->has('date_to') && $request->date_to != '') {
+        } elseif ($request->filled('date_to')) {
             $query->whereDate('tanggal_selesai', '<=', $request->date_to);
         }
 
         $query->orderBy('tanggal_selesai', 'desc')
-                        ->orderBy('id', 'desc');
+            ->orderBy('id', 'desc');
 
         if ($request->has('export') && $request->export == 'true') {
             $history = $query->get();
@@ -53,7 +58,7 @@ class RiwayatPerawatanController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $history
+            'data' => $history,
         ]);
     }
 }
