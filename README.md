@@ -116,6 +116,43 @@ File hasil *build* akan berada di dalam folder `Frontend/dist` yang siap untuk d
 
 ---
 
+## 🖥️ Deployment Server Windows (Auto-Start dengan NSSM)
+
+Untuk panduan lengkap deployment di **Server Windows** tanpa Docker/WSL, lengkap dengan fitur **Auto-Start Service** ketika komputer restart/mati lampu, silakan merujuk ke dokumen panduan:
+
+👉 **[DEPLOYMENT_WINDOWS.md](file:///home/ronaltama/PROJECT/RM_TRANS-Monitoring-Bengkel/DEPLOYMENT_WINDOWS.md)**
+
+### Ringkasan Perintah Mengelola Windows Services (NSSM):
+Buka **CMD (Run as Administrator)** di Windows Server:
+
+* **Cek Status Service:**
+  ```cmd
+  nssm status RMTransBackend
+  nssm status RMTransFrontend
+  ```
+* **Restart Service (Sesudah Update Code):**
+  ```cmd
+  nssm restart RMTransBackend
+  nssm restart RMTransFrontend
+  ```
+* **Stop Service:**
+  ```cmd
+  nssm stop RMTransBackend
+  nssm stop RMTransFrontend
+  ```
+* **Edit Service (GUI):**
+  ```cmd
+  nssm edit RMTransBackend
+  nssm edit RMTransFrontend
+  ```
+* **Hapus Service:**
+  ```cmd
+  nssm remove RMTransBackend confirm
+  nssm remove RMTransFrontend confirm
+  ```
+
+---
+
 ## 🔐 Environment Variables (.env)
 
 ### Backend (`backend/.env`)
