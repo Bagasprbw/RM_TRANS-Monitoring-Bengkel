@@ -7,13 +7,23 @@
           <h2 class="page-title">Daftar Kendaraan</h2>
           <p class="page-sub">Kelola data kendaraan workshop</p>
         </div>
-        <button class="btn-primary" @click="showAdd = true" :disabled="loading">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2.5">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          {{ loading ? 'Memuat...' : 'Tambah Kendaraan' }}
-        </button>
+        <div class="topbar-actions">
+          <button class="btn-import" @click="showImport = true" :disabled="loading">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Import Excel
+          </button>
+          <button class="btn-primary" @click="showAdd = true" :disabled="loading">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            {{ loading ? 'Memuat...' : 'Tambah Kendaraan' }}
+          </button>
+        </div>
       </header>
 
       <div class="content-body">
@@ -177,6 +187,7 @@
     <EditKendaraanModal :is-open="showEdit" :kendaraan="selectedKendaraan" @close="closeEdit"
       @kendaraan-updated="updateKendaraan" />
     <ManageMasterModal :is-open="showManageMaster" @close="showManageMaster = false" />
+    <ImportModal :is-open="showImport" module="armada" @close="showImport = false" @imported="onArmadaImported" />
   </div>
 </template>
 
@@ -186,10 +197,11 @@ import Sidebar from '@/components/Sidebar.vue'
 import AddKendaraanModal from '@/components/AddKendaraanModal.vue'
 import EditKendaraanModal from '@/components/EditKendaraanModal.vue'
 import ManageMasterModal from '@/components/ManageMasterModal.vue'
+import ImportModal from '@/components/ImportModal.vue'
 
 export default {
   name: 'KendaraanView',
-  components: { Sidebar, AddKendaraanModal, EditKendaraanModal, ManageMasterModal },
+  components: { Sidebar, AddKendaraanModal, EditKendaraanModal, ManageMasterModal, ImportModal },
   data() {
     return {
       searchQuery: '',
@@ -197,6 +209,7 @@ export default {
       showAdd: false,
       showEdit: false,
       showManageMaster: false,
+      showImport: false,
       selectedKendaraan: null
     }
   },
@@ -305,6 +318,10 @@ export default {
       await this.deleteArmada(id)
     },
 
+    async onArmadaImported() {
+      await this.loadArmadaData()
+    },
+
     getMerkBadgeStyle(merkId) {
       const merkData = this.dynamicMerkList.find(m => m.id === merkId)
       if (merkData) {
@@ -379,6 +396,38 @@ export default {
 .btn-primary:hover {
   background: #4c4bb0;
   transform: translateY(-1px);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-import {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.6rem 1.1rem;
+  background: #fff;
+  border: 1.5px solid #6366f1;
+  border-radius: 10px;
+  color: #4f46e5;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-import:hover:not(:disabled) {
+  background: #eef2ff;
+  transform: translateY(-1px);
+}
+
+.btn-import:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ===== CONTENT ===== */

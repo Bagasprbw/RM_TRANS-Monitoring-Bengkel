@@ -1,23 +1,5 @@
 # ============================================================
-# STAGE 1: Install Composer Dependencies
-# ============================================================
-FROM composer:2 AS vendor
-
-WORKDIR /app
-
-COPY composer.json composer.lock ./
-
-# Install tanpa dev dependencies untuk production
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --no-scripts \
-    --prefer-source \
-    --optimize-autoloader \
-    --ignore-platform-reqs
-
-# ============================================================
-# STAGE 2: Final Production Image
+# Production Image (using local vendor directory)
 # ============================================================
 FROM php:8.3-fpm-alpine
 
@@ -50,10 +32,7 @@ RUN apk add --no-cache \
 # Set working directory
 WORKDIR /var/www/html
 
-# Salin vendor dari stage 1
-COPY --from=vendor /app/vendor ./vendor
-
-# Salin seluruh kode aplikasi
+# Salin seluruh kode aplikasi (termasuk vendor lokal)
 COPY . .
 
 # Buat direktori storage yang dibutuhkan & set permission
