@@ -19,6 +19,21 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // midleware auth
 Route::middleware('auth:sanctum')->group(function () {
+    // Import Armada
+    Route::get('armada/import-template', [ArmadaImportController::class, 'template']);
+    Route::post('armada/import-preview', [ArmadaImportController::class, 'preview']);
+    Route::post('armada/import-execute', [ArmadaImportController::class, 'execute']);
+
+    // Import Monitoring Aktif
+    Route::get('monitoring_armada_aktif/import-template', [MonitoringImportController::class, 'template']);
+    Route::post('monitoring_armada_aktif/import-preview', [MonitoringImportController::class, 'preview']);
+    Route::post('monitoring_armada_aktif/import-execute', [MonitoringImportController::class, 'execute']);
+
+    // Import Log Kilometer
+    Route::get('log_kilometer/import-template', [LogKilometerImportController::class, 'template']);
+    Route::post('log_kilometer/import-preview', [LogKilometerImportController::class, 'preview']);
+    Route::post('log_kilometer/import-execute', [LogKilometerImportController::class, 'execute']);
+
     // Armada
     Route::apiResource('armada', ArmadaController::class);
     // Jenis Armada
@@ -46,21 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('komponen_armada/{id}', [KomponenArmadaController::class, 'update']);
     Route::delete('komponen_armada/{id}', [KomponenArmadaController::class, 'destroy']);
     Route::get('riwayat_perawatan', [RiwayatPerawatanController::class, 'index']);
-
-    // Import Armada
-    Route::get('armada/import-template', [ArmadaImportController::class, 'template']);
-    Route::post('armada/import-preview', [ArmadaImportController::class, 'preview']);
-    Route::post('armada/import-execute', [ArmadaImportController::class, 'execute']);
-
-    // Import Monitoring Aktif
-    Route::get('monitoring_armada_aktif/import-template', [MonitoringImportController::class, 'template']);
-    Route::post('monitoring_armada_aktif/import-preview', [MonitoringImportController::class, 'preview']);
-    Route::post('monitoring_armada_aktif/import-execute', [MonitoringImportController::class, 'execute']);
-
-    // Import Log Kilometer
-    Route::get('log_kilometer/import-template', [LogKilometerImportController::class, 'template']);
-    Route::post('log_kilometer/import-preview', [LogKilometerImportController::class, 'preview']);
-    Route::post('log_kilometer/import-execute', [LogKilometerImportController::class, 'execute']);
 
     // Profiling
     Route::post('update-profile', [AuthController::class, 'updateProfile']);
