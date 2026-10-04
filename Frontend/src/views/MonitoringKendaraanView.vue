@@ -8,6 +8,37 @@
           <p class="page-sub"><span class="accent">{{ monitoringList.length }}</span> kendaraan aktif</p>
         </div>
         <div class="topbar-actions">
+          <div ref="importDropdown" class="import-dropdown-wrap">
+            <button class="btn-import" @click="showImportMenu = !showImportMenu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span>Import Excel</span>
+              <svg class="chevron-icon" :class="{ open: showImportMenu }" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="12" height="12" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div v-if="showImportMenu" class="import-dropdown-menu">
+              <button class="dropdown-item" @click="openImport('monitoring')">
+                <div class="dropdown-icon icon-cyan">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="dropdown-text">
+                  <div class="dropdown-title">Aktivasi Monitoring</div>
+                  <div class="dropdown-desc">Daftarkan kendaraan ke monitoring</div>
+                </div>
+              </button>
+              <button class="dropdown-item" @click="openImport('logkm')">
+                <div class="dropdown-icon icon-green">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div class="dropdown-text">
+                  <div class="dropdown-title">Log KM (Odometer)</div>
+                  <div class="dropdown-desc">Update kilometer harian massal</div>
+                </div>
+              </button>
+            </div>
+          </div>
           <button class="btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
@@ -134,22 +165,27 @@
       @close="showAdd = false"
       @vehicle-added="handleVehicleAdded"
     />
+    <ImportModal :is-open="showImport" :module="importModule" @close="showImport = false" @imported="onMonitoringImported" />
   </div>
 </template>
 
 <script>
 import Sidebar from '@/components/Sidebar.vue'
 import AddVehicleToMonitoringModal from '@/components/AddVehicleToMonitoringModal.vue'
+import ImportModal from '@/components/ImportModal.vue'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import Swal from 'sweetalert2'
 
 export default {
   name: 'MonitoringKendaraanView',
-  components: { Sidebar, AddVehicleToMonitoringModal },
+  components: { Sidebar, AddVehicleToMonitoringModal, ImportModal },
   data() {
     return {
       searchQuery: '',
-      showAdd: false
+      showAdd: false,
+      showImport: false,
+      importModule: 'monitoring',
+      showImportMenu: false
     }
   },
   computed: {
@@ -180,11 +216,28 @@ export default {
   mounted() {
     this.fetchMonitoring()
     this.fetchReminders()
+    document.addEventListener('click', this.handleOutsideClick)
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.handleOutsideClick)
   },
   methods: {
     ...mapActions('monitoring', ['fetchMonitoring', 'deleteMonitoring', 'updateStatus', 'fetchReminders']),
     async handleVehicleAdded() { 
       this.showAdd = false
+    },
+    handleOutsideClick(e) {
+      if (this.$refs.importDropdown && !this.$refs.importDropdown.contains(e.target)) {
+        this.showImportMenu = false
+      }
+    },
+    openImport(module) {
+      this.importModule = module
+      this.showImportMenu = false
+      this.showImport = true
+    },
+    async onMonitoringImported() {
+      await this.fetchMonitoring()
     },
     async removeVehicle(id) {
       await this.deleteMonitoring(id)
@@ -276,6 +329,20 @@ input:checked + .slider:before { transform: translateX(16px); }
 .btn-primary:hover { background: #4c4bb0; transform: translateY(-1px); }
 .btn-secondary { display: flex; align-items: center; gap: 6px; padding: 0.55rem 1rem; background: #fff; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.15s; }
 .btn-secondary:hover { border-color: #3E3D90; color: #3E3D90; background: #f5f5fb; }
+.btn-import { display: flex; align-items: center; gap: 6px; padding: 0.55rem 1rem; background: #fff; border: 1.5px solid #6366f1; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 600; color: #4f46e5; cursor: pointer; transition: all 0.15s; }
+.btn-import:hover { background: #eef2ff; transform: translateY(-1px); }
+
+.import-dropdown-wrap { position: relative; }
+.chevron-icon { transition: transform 0.2s; margin-left: 2px; }
+.chevron-icon.open { transform: rotate(180deg); }
+.import-dropdown-menu { position: absolute; top: calc(100% + 6px); left: 0; background: #fff; border-radius: 12px; border: 1px solid #e8e8f0; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); padding: 6px; min-width: 250px; z-index: 100; display: flex; flex-direction: column; gap: 4px; }
+.dropdown-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; border: none; background: transparent; cursor: pointer; text-align: left; transition: background 0.15s; width: 100%; font-family: 'Poppins', sans-serif; }
+.dropdown-item:hover { background: #f8fafc; }
+.dropdown-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dropdown-icon.icon-cyan { background: #ecfeff; color: #0891b2; }
+.dropdown-icon.icon-green { background: #ecfdf5; color: #059669; }
+.dropdown-title { font-size: 0.82rem; font-weight: 600; color: #1e1d4c; line-height: 1.2; }
+.dropdown-desc { font-size: 0.72rem; color: #9ca3af; margin-top: 2px; }
 
 .content-body { flex: 1; padding: 1.75rem 2rem; }
 

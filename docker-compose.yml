@@ -15,11 +15,11 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     networks:
       - app_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secret}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secret}" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -29,6 +29,7 @@ services:
   # BACKEND: Laravel (PHP-FPM)
   # ─────────────────────────────────────────
   backend:
+    build: ./backend
     image: ghcr.io/ronaltama/rm_trans-monitoring-bengkel/backend:latest
     container_name: rm_trans_backend
     restart: unless-stopped
@@ -77,6 +78,7 @@ services:
   # FRONTEND: Vue 2 (Vite Build) + Nginx
   # ─────────────────────────────────────────
   frontend:
+    build: ./Frontend
     image: ghcr.io/ronaltama/rm_trans-monitoring-bengkel/frontend:latest
     container_name: rm_trans_frontend
     restart: unless-stopped
@@ -104,7 +106,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - $HOME/projects:/home/projects
       - $HOME/.ssh:/root/.ssh:ro
-    command: ["-verbose", "-hooks=/etc/webhook/hooks.json", "-hotreload"]
+    command: [ "-verbose", "-hooks=/etc/webhook/hooks.json", "-hotreload" ]
     networks:
       - app_network
 
@@ -125,7 +127,7 @@ services:
     networks:
       - app_network
     profiles:
-      - tunnel  # Hanya aktif jika dijalankan dengan: docker compose --profile tunnel up -d
+      - tunnel # Hanya aktif jika dijalankan dengan: docker compose --profile tunnel up -d
 
 # ─────────────────────────────────────────
 # VOLUMES & NETWORKS
