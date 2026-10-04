@@ -99,15 +99,27 @@
                     </span>
                   </td>
                   <td @click.stop>
-                    <label class="switch">
+                    <label class="switch" :title="item.status === 'aktif' ? 'Klik untuk Non-aktifkan' : 'Klik untuk Aktifkan'">
                       <input type="checkbox" :checked="item.status === 'aktif'" @change="toggleStatus(item)">
                       <span class="slider round"></span>
                     </label>
                   </td>
                   <td @click.stop>
-                    <button class="icon-btn delete" @click="removeVehicle(item.id)" title="Hapus">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6V20a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6"/></svg>
-                    </button>
+                    <div class="action-wrap">
+                      <button 
+                        v-if="item.status === 'aktif'"
+                        class="icon-btn detail" 
+                        @click="$router.push('/monitoring-kendaraan/' + item.id)" 
+                        :title="`Lihat kesehatan komponen untuk armada ${getPlatNomor(item)}`"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
+                      <button class="icon-btn delete" @click="removeVehicle(item.id)" title="Hapus dari Monitoring">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6V20a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6"/></svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -287,7 +299,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 .table tbody td { padding: 0.95rem 1.25rem; font-size: 0.85rem; color: #374151; border-bottom: 1px solid #f5f5fb; vertical-align: middle; }
 .table tbody tr:last-child td { border-bottom: none; }
 .clickable { cursor: pointer; }
-.clickable:hover td { background: #faf9ff; }
+.clickable:hover td { background: #f0f0ff; }
 
 .nopol-cell { display: flex; align-items: center; gap: 9px; }
 .nopol-text { font-weight: 700; color: #1e1d4c; letter-spacing: 0.3px; }
@@ -340,8 +352,11 @@ input:checked + .slider:before { transform: translateX(16px); }
 .empty-row svg { margin: 0 auto 0.5rem; display: block; }
 .empty-row p { font-size: 0.85rem; }
 
+.action-wrap { display: flex; gap: 4px; align-items: center; }
 .icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; border-radius: 8px; cursor: pointer; color: #b0b0c8; transition: all 0.15s; }
-.icon-btn.delete:hover { color: #ef4444; background: #fff0f0; }
+.icon-btn.detail:hover { color: #fff; background: #3E3D90; transform: scale(1.1); }
+.icon-btn.activate:hover { color: #fff; background: #22c55e; transform: scale(1.1); }
+.icon-btn.delete:hover { color: #fff; background: #ef4444; transform: scale(1.1); }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
