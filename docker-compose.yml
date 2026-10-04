@@ -78,6 +78,7 @@ services:
   # FRONTEND: Vue 2 (Vite Build) + Nginx
   # ─────────────────────────────────────────
   frontend:
+    build: ./Frontend
     image: ghcr.io/ronaltama/rm_trans-monitoring-bengkel/frontend:latest
     container_name: rm_trans_frontend
     restart: unless-stopped
