@@ -120,7 +120,7 @@ File hasil *build* akan berada di dalam folder `Frontend/dist` yang siap untuk d
 
 Untuk panduan lengkap deployment di **Server Windows** tanpa Docker/WSL, lengkap dengan fitur **Auto-Start Service** ketika komputer restart/mati lampu, silakan merujuk ke dokumen panduan:
 
-👉 **[DEPLOYMENT_WINDOWS.md](file:///home/ronaltama/PROJECT/RM_TRANS-Monitoring-Bengkel/DEPLOYMENT_WINDOWS.md)**
+👉 **[DEPLOYMENT_WINDOWS.md](DEPLOYMENT_WINDOWS.md)**
 
 ### Ringkasan Perintah Mengelola Windows Services (NSSM):
 Buka **CMD (Run as Administrator)** di Windows Server:
@@ -140,16 +140,31 @@ Buka **CMD (Run as Administrator)** di Windows Server:
   nssm stop RMTransBackend
   nssm stop RMTransFrontend
   ```
-* **Edit Service (GUI):**
-  ```cmd
-  nssm edit RMTransBackend
-  nssm edit RMTransFrontend
-  ```
-* **Hapus Service:**
-  ```cmd
-  nssm remove RMTransBackend confirm
-  nssm remove RMTransFrontend confirm
-  ```
+
+### Cara Memperbarui (Update) Aplikasi di Server Windows:
+Jika ada fitur baru yang di-*push* ke GitHub, ikuti langkah berikut di CMD Server Anda:
+
+1. Buka CMD di folder proyek.
+2. Simpan jika ada perubahan lokal (opsional): `git stash`
+3. Tarik update terbaru: `git pull origin main`
+4. Update dependensi Backend (PHP):
+   ```cmd
+   cd backend
+   composer update
+   php artisan migrate
+   cd ..
+   ```
+5. Update dependensi Frontend (Node):
+   ```cmd
+   cd Frontend
+   npm install
+   cd ..
+   ```
+6. Terakhir, jalankan restart (di CMD Administrator):
+   ```cmd
+   nssm restart RMTransBackend
+   nssm restart RMTransFrontend
+   ```
 
 ---
 
