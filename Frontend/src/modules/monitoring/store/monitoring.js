@@ -58,12 +58,15 @@ const actions = {
       return { success: true, data: response.data }
     } catch (error) {
       console.error('Error fetching monitoring armada:', error)
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal Memuat Data',
-        text: error.response?.data?.message || 'Terjadi kesalahan saat memuat data monitoring kendaraan',
-        confirmButtonColor: '#3E3D90'
-      })
+      // Jangan tampilkan alert jika 401 — sudah ditangani oleh axios interceptor (redirect ke login)
+      if (error.response?.status !== 401) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Memuat Data',
+          text: error.response?.data?.message || 'Terjadi kesalahan saat memuat data monitoring kendaraan',
+          confirmButtonColor: '#3E3D90'
+        })
+      }
       return { success: false, error: error.response?.data?.message || error.message }
     } finally {
       commit('SET_LOADING', false)
